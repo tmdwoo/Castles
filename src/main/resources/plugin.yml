@@ -1,0 +1,59 @@
+name: Castles
+version: '${project.version}'
+main: castles.castles.Castles
+api-version: 1.19
+authors: [ makult ]
+commands:
+  castles:
+    description: Castles command
+    usage: /<command>
+    aliases: [cs]
+    permission: castles.castles
+  bloodpoints:
+    description: Blood Points command
+    usage: /<command>
+    aliases: [bp]
+    permission: castles.bloodpoints
+permissions:
+  castles.castles:
+    description: Castles command
+    default: true
+  castles.castles.list:
+    description: Castles list command
+    default: true
+  castles.castles.reload:
+    description: Castles reload command
+    default: op
+  castles.castles.create:
+    description: Castles create command
+    default: op
+  castles.castles.remove:
+    description: Castles remove command
+    default: op
+  castles.castles.expand:
+    description: Castles expand command
+    default: op
+  castles.castles.teleport.any:
+    description: Castles teleport command
+    default: op
+  castles.castles.teleport.own:
+    description: Castles teleport command
+    default: true
+  castles.castles.modify:
+    description: Castles modify command
+    default: op
+  castles.castles.core:
+    description: Castles core command
+    default: op
+  castles.castles.rampart:
+    description: Castles rampart command
+    default: op
+  castles.castles.state:
+    description: Castles state command
+    default: true
+  castles.castles.state.change:
+    description: Castles state change command
+    default: op
+  castles.bloodpoints:
+    description: Blood Points command
+    default: op
