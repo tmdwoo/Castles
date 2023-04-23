@@ -51,9 +51,9 @@ public class Castle implements Serializable {
     public List<Map<String, Object>> crackedRampart = new ArrayList<>();
     public HashMap<Map<String, Object>, String> beforeRampart = new HashMap<>();
     public Integer protectionTime = 3600;
-    public double coreHealth = 100;
+    public double coreHealth;
     public int lastHit = 0;
-    public int rampartHealth = 100;
+    public int rampartHealth;
     public HashMap<String, Integer> levels = new HashMap<>();
 
     public Castle(String name, Location location) {
@@ -79,6 +79,8 @@ public class Castle implements Serializable {
             chunks.add(new ChunkPos(location));
             levels.put("core", 1);
             levels.put("rampart", 1);
+            coreHealth = getCoreMaxHealth();
+            rampartHealth = getRampartMaxHealth();
             getBossBar().setProgress(1);
             setCore();
             setRampart();
@@ -447,7 +449,7 @@ public class Castle implements Serializable {
     }
 
     public int getRampartMaxHealth() {
-        return levels.get("rampart") * 100;
+        return levels.get("rampart") * 200;
     }
 
     public void damageRampart() {
