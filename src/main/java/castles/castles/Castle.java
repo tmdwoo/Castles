@@ -228,6 +228,7 @@ public class Castle implements Serializable {
         for (ChunkPos chunk : chunks) {
             chunk.getChunk().getPersistentDataContainer().set(Utils.castlesKey, PersistentDataType.STRING, name);
         }
+        getBossBar().setTitle(name);
         setCore();
     }
 
