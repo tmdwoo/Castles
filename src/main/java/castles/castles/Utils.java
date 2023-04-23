@@ -974,13 +974,13 @@ public class Utils {
     }
 
     public static void saveVictims() {
-        File dir = new File("plugins/castles");
-        if (!dir.exists()) {
+        final File configFolder = plugin.getDataFolder();
+        if (!configFolder.exists()) {
             //noinspection ResultOfMethodCallIgnored
-            dir.mkdir();
+            configFolder.mkdir();
         }
         try {
-            final File dataFile = new File(dir, "Victims.dat");
+            final File dataFile = new File(configFolder, "Victims.dat");
             if (!dataFile.exists()) {
                 //noinspection ResultOfMethodCallIgnored
                 dataFile.createNewFile();
@@ -1021,13 +1021,14 @@ public class Utils {
     }
 
     public static void saveCastles() {
-        File dir = new File("plugins/castles");
-        if (!dir.exists()) {
+        final File configFolder = plugin.getDataFolder();
+        if (!configFolder.exists()) {
             //noinspection ResultOfMethodCallIgnored
-            dir.mkdir();
+            configFolder.mkdir();
         }
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream("plugins/castles/castles.dat");
+            final File dataFile = new File(configFolder, "castles.dat");
+            FileOutputStream fileOutputStream = new FileOutputStream(dataFile);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
             objectOutputStream.writeObject(castles);
             objectOutputStream.close();
