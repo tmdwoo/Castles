@@ -604,6 +604,10 @@ public class Castle implements Serializable {
         Location location = getLocation();
         Vex vex = location.getWorld().spawn(location, Vex.class);
         vex.setTarget(entity);
+        getOwner().addEntity(vex);
+        Scheduler.scheduleSyncDelayedTask(() -> {
+            vex.remove();
+        }, 20 * 60);
     }
 
     public List<Player> getPlayersInCastle() {
