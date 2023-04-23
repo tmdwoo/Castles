@@ -36,7 +36,7 @@ public class CastleMiscellaneousHandler implements Listener {
         if (Objects.equals(fromCastle, toCastle)) return;
         Team team = player.getScoreboard().getPlayerTeam(player);
         if (team == null) return;
-        if (Objects.equals(team, fromCastle.getOwner())) {
+        if (Objects.equals(team, toCastle.getOwner())) {
             player.setBedSpawnLocation(toCastle.getLocation());
         }
     }
