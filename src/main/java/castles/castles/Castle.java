@@ -92,6 +92,7 @@ public class Castle implements Serializable {
         if (bossBar == null) {
             Bukkit.createBossBar(bossBarKey, name, BarColor.WHITE, BarStyle.SOLID);
             bossBar = Bukkit.getBossBar(bossBarKey);
+            bossBar.setProgress(coreHealth / getCoreMaxHealth());
         }
         return bossBar;
     }
