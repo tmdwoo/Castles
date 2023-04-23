@@ -3,6 +3,7 @@ package castles.castles;
 import castles.castles.command.BloodPointsCommand;
 import castles.castles.command.CastlesCommand;
 import castles.castles.config.Config;
+import castles.castles.gui.CoreGuiHandler;
 import castles.castles.handler.*;
 import castles.castles.scheduler.Schedules;
 import castles.castles.tabcompletion.BloodPointsTabCompletion;
@@ -38,6 +39,7 @@ public final class Castles extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new CastleMiscellaneousHandler(), this);
         getServer().getPluginManager().registerEvents(new BloodPointHandler(), this);
         getServer().getPluginManager().registerEvents(new TeleportHandler(), this);
+        getServer().getPluginManager().registerEvents(new CoreGuiHandler(), this);
         this.getCommand("castles").setExecutor(new CastlesCommand());
         this.getCommand("bloodpoints").setExecutor(new BloodPointsCommand());
         this.getCommand("castles").setTabCompleter(new CastlesTabCompletion());
