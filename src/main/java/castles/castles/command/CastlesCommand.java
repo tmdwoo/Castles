@@ -55,7 +55,7 @@ public class CastlesCommand implements CommandExecutor {
         String commandError = command.substring(position);
         commandCorrect = commandCorrect.length() > 10 ? "..." + commandCorrect.substring(commandCorrect.length() - 10) : commandCorrect;
         Component errorMessage = Component.text(
-                type.getPhrase(sender), NamedTextColor.RED)
+                        type.getPhrase(sender), NamedTextColor.RED)
                 .appendNewline()
                 .append((Component.text(commandCorrect, NamedTextColor.GRAY)))
                 .append(Component.text(commandError, NamedTextColor.RED, TextDecoration.UNDERLINED))
@@ -445,7 +445,7 @@ public class CastlesCommand implements CommandExecutor {
         if (args.length < index) {
             error(sender, label, args, index, UNKNOWN_COMMAND);
             return;
-        } else if (args.length > index + 4) {
+        } else if (args.length > index + 3) {
             error(sender, label, args, index, INCORRECT_ARGUMENT);
             return;
         }
@@ -458,19 +458,19 @@ public class CastlesCommand implements CommandExecutor {
             Player player = (Player) sender;
             location = new Location(player.getWorld(), player.getLocation().getBlockX() + 0.5, round(player.getLocation().getY()), player.getLocation().getBlockZ() + 0.5);
         } else {
-            location = parseBlockLocation(sender, args, index + 1);
+            location = parseBlockLocation(sender, args, index);
             if (location == null) {
-                if(!isInteger(args[index + 1])) {
+                if(!isInteger(args[index])) {
+                    error(sender, label, args, index, EXPECTED_INTEGER);
+                    return;
+                } else if(args.length >= index + 2 && !isInteger(args[index + 1])) {
                     error(sender, label, args, index + 1, EXPECTED_INTEGER);
                     return;
                 } else if(args.length >= index + 3 && !isInteger(args[index + 2])) {
                     error(sender, label, args, index + 2, EXPECTED_INTEGER);
                     return;
-                } else if(args.length >= index + 4 && !isInteger(args[index + 3])) {
-                    error(sender, label, args, index + 3, EXPECTED_INTEGER);
-                    return;
                 } else {
-                    error(sender, label, args, index + 1, INCORRECT_ARGUMENT);
+                    error(sender, label, args, index, INCORRECT_ARGUMENT);
                     return;
                 }
             }
