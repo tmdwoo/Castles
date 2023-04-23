@@ -596,7 +596,7 @@ public class Castle implements Serializable {
     public List<Player> getPlayersInCastle() {
         List<Player> players = new ArrayList<>();
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (getCastleByLocation(player.getLocation()) == this) players.add(player);
+            if (getCastleByLocation(player.getLocation()) == this && player.getLocation().distance(getLocation()) <= 16) players.add(player);
         }
         return players;
     }
@@ -605,7 +605,7 @@ public class Castle implements Serializable {
         List<Mob> mobs = new ArrayList<>();
         for (ChunkPos chunkPos : chunks) {
             for (Entity entity : chunkPos.getChunk().getEntities()) {
-                if (entity instanceof Mob) mobs.add((Mob) entity);
+                if (entity instanceof Mob && !getCore().equals(entity) && getCore().getLocation().distance(entity.getLocation()) <= 16) mobs.add((Mob) entity);
             }
         }
         return mobs;
