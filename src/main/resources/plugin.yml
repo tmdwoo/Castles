@@ -21,6 +21,9 @@ permissions:
   castles.castles.list:
     description: Castles list command
     default: true
+  castles.castles.list.all:
+    description: Castles list command
+    default: op
   castles.castles.reload:
     description: Castles reload command
     default: op

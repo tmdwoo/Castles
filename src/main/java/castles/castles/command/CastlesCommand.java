@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static castles.castles.Castles.teleportWarmup;
@@ -100,12 +101,29 @@ public class CastlesCommand implements CommandExecutor {
             return;
         }
         sender.sendMessage(Component.text(CASTLES_LIST_TITLE.getPhrase(sender)).color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD));
-        if (Castles.castles.size() == 0) {
+        List<Castle> castles;
+        if (sender instanceof Player && !sender.hasPermission("castles.castles.list.all")) {
+            Team team = ((Player) sender).getScoreboard().getPlayerTeam((OfflinePlayer) sender);
+            if (team == null) {
+                sender.sendMessage(Component.text(NO_CASTLES.getPhrase(sender)).color(NamedTextColor.GRAY));
+                return;
+            } else {
+                castles = new ArrayList<>();
+                for (Castle castle : Castles.castles) {
+                    if (castle.getOwner().equals(team)) {
+                        castles.add(castle);
+                    }
+                }
+            }
+        } else {
+            castles = Castles.castles;
+        }
+        if (castles.size() == 0) {
             sender.sendMessage(Component.text(NO_CASTLES.getPhrase(sender)).color(NamedTextColor.GRAY));
             return;
         }
         ArrayList<Component> castleNames = new ArrayList<>();
-        for (Castle castle : Castles.castles) {
+        for (Castle castle : castles) {
             castleNames.add(castle.getComponent(sender));
         }
         sender.sendMessage(Component.join(Component.text(", "), castleNames));
