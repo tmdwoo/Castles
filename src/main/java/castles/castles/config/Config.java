@@ -202,7 +202,7 @@ public class Config {
             return dfl;
         }
 
-        configured = configured.replaceAll("[^0-9]", "");
+        configured = configured.replaceAll("[^-0-9]", "");
 
         return configured.isEmpty() ? 0 : Integer.parseInt(configured);
     }
@@ -218,7 +218,7 @@ public class Config {
             return dfl;
         }
 
-        configured = configured.replaceAll("[^0-9.]", "");
+        configured = configured.replaceAll("[^-0-9.]", "");
 
         return configured.isEmpty() ? 0.0 : Double.parseDouble(configured);
     }
