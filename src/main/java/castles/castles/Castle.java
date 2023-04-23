@@ -79,8 +79,6 @@ public class Castle implements Serializable {
             chunks.add(new ChunkPos(location));
             levels.put("core", 1);
             levels.put("rampart", 1);
-            NamespacedKey bossBarKey = new NamespacedKey(plugin, Long.toString(createdTime));
-            Bukkit.createBossBar(bossBarKey, name, BarColor.WHITE, BarStyle.SOLID);
             getBossBar().setProgress(1);
             setCore();
             setRampart();
@@ -88,9 +86,14 @@ public class Castle implements Serializable {
         }
     }
 
-    public BossBar getBossBar() {
+    public @NotNull BossBar getBossBar() {
         NamespacedKey bossBarKey = new NamespacedKey(plugin, Long.toString(createdTime));
-        return Bukkit.getBossBar(bossBarKey);
+        BossBar bossBar = Bukkit.getBossBar(bossBarKey);
+        if (bossBar == null) {
+            Bukkit.createBossBar(bossBarKey, name, BarColor.WHITE, BarStyle.SOLID);
+            bossBar = Bukkit.getBossBar(bossBarKey);
+        }
+        return bossBar;
     }
 
     private void setCore() {
