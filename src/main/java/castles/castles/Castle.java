@@ -197,6 +197,12 @@ public class Castle implements Serializable {
         setRampartHealth(getRampartMaxHealth());
         updateRampart();
         setOwner(team);
+        if (team != null) {
+            for (Player player : getPlayersInCastle()) {
+                Team playerTeam = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
+                if (team.equals(playerTeam)) player.setBedSpawnLocation(getLocation(), true);
+            }
+        }
         getLocation().getWorld().spawnParticle(Particle.ELECTRIC_SPARK, getLocation(), 100, 0.5, 0.5, 0.5, 0.1);
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (team == null) {
@@ -239,6 +245,12 @@ public class Castle implements Serializable {
     }
 
     public void setOwner(Team owner) {
+        Castle nearestCastle = getNearestCastle(getLocation());
+        for (OfflinePlayer player : getOwner().getPlayers()) {
+            if (player.isOnline() && Objects.equals(getCastleByLocation(player.getBedSpawnLocation()), this)) {
+                ((Player) player).setBedSpawnLocation(nearestCastle == null ? null : nearestCastle.getLocation(), true);
+            }
+        }
         this.owner = owner == null ? null : owner.getName();
         Material wool = DyeColor2Wool.get(t2dColorMap.get(owner != null && owner.hasColor() ? owner.color() : NamedTextColor.WHITE));
         for (Map<String, Object> wools : flags.get("wools")) {

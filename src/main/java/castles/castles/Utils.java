@@ -7,6 +7,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.*;
@@ -1082,5 +1083,32 @@ public class Utils {
             return getCastleByName(name);
         }
         return null;
+    }
+
+    /**
+     * Get the castle nearest to the given player.
+     * @param location The location to check
+     * @return The castle nearest to the given player or null if no castle exists
+     */
+    public static @Nullable Castle getNearestCastle(Location location) {
+        Castle nearestCastle = null;
+        double nearestDistance = Double.MAX_VALUE;
+        for (Castle castle : Castles.castles) {
+            double distance = castle.getLocation().distance(location);
+            if (distance < nearestDistance) {
+                nearestCastle = castle;
+                nearestDistance = distance;
+            }
+        }
+        return nearestCastle;
+    }
+
+    /**
+     * Get the castle nearest to the given player.
+     * @param player The player to check
+     * @return The castle nearest to the given player or null if no castle exists
+     */
+    public static @Nullable Castle getNearestCastle(Player player) {
+        return getNearestCastle(player.getLocation());
     }
 }

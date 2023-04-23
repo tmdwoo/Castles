@@ -3,6 +3,7 @@ package castles.castles.handler;
 import castles.castles.Castle;
 import castles.castles.Castles;
 import castles.castles.scheduler.Scheduler;
+import com.destroystokyo.paper.event.player.PlayerSetSpawnEvent;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,10 +13,13 @@ import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerCommandEvent;
+import org.bukkit.scoreboard.Team;
 
 import java.util.Iterator;
+import java.util.Objects;
 
 import static castles.castles.Utils.getCastleByLocation;
+import static castles.castles.Utils.getNearestCastle;
 
 public class CastleMiscellaneousHandler implements Listener {
     // protect flag
@@ -71,12 +75,29 @@ public class CastleMiscellaneousHandler implements Listener {
         }
     }
 
+    void updateSpawnPoint(Castle fromCastle, Castle toCastle, Player player) {
+        Team team = player.getScoreboard().getPlayerTeam(player);
+        if (Objects.equals(fromCastle, toCastle)) return;
+        if (team == null) return;
+        if (Objects.equals(team, fromCastle.getOwner())) {
+            player.setBedSpawnLocation(toCastle.getLocation());
+        }
+    }
+
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         if (!event.isCancelled()) {
             Castle toCastle = getCastleByLocation(event.getTo());
             Castle fromCastle = getCastleByLocation(event.getFrom());
             updateBossBar(fromCastle, toCastle, event.getPlayer());
+            updateSpawnPoint(fromCastle, toCastle, event.getPlayer());
+        }
+    }
+
+    @EventHandler
+    public void onPlayerSetSpawn(PlayerSetSpawnEvent event) {
+        if (event.getCause().equals(PlayerSetSpawnEvent.Cause.BED) || event.getCause().equals(PlayerSetSpawnEvent.Cause.RESPAWN_ANCHOR)) {
+            event.setCancelled(true);
         }
     }
 
@@ -86,6 +107,7 @@ public class CastleMiscellaneousHandler implements Listener {
             Castle toCastle = getCastleByLocation(event.getTo());
             Castle fromCastle = getCastleByLocation(event.getFrom());
             updateBossBar(fromCastle, toCastle, event.getPlayer());
+            updateSpawnPoint(fromCastle, toCastle, event.getPlayer());
         }
     }
 
@@ -93,6 +115,12 @@ public class CastleMiscellaneousHandler implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Castle toCastle = getCastleByLocation(event.getPlayer().getLocation());
         updateBossBar(null, toCastle, event.getPlayer());
+        Castle spawnCastle = getCastleByLocation(event.getPlayer().getBedSpawnLocation());
+        Team team = event.getPlayer().getScoreboard().getPlayerTeam(event.getPlayer());
+        if (team != null && (spawnCastle == null || !Objects.equals(team, spawnCastle.getOwner()))) {
+            Castle nearestCastle = getNearestCastle(event.getPlayer().getLocation());
+            event.getPlayer().setBedSpawnLocation(nearestCastle == null ? null : nearestCastle.getLocation(), true);
+        }
     }
 
     @EventHandler
