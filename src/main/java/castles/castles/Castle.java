@@ -617,7 +617,7 @@ public class Castle implements Serializable {
         List<Mob> mobs = new ArrayList<>();
         for (ChunkPos chunkPos : chunks) {
             for (Entity entity : chunkPos.getChunk().getEntities()) {
-                if (entity instanceof Mob && !getCore().equals(entity) && getCore().getLocation().distance(entity.getLocation()) <= 16) mobs.add((Mob) entity);
+                if (entity instanceof Mob && !getCore().equals(entity) && !entity.getType().equals(EntityType.VEX) && getCore().getLocation().distance(entity.getLocation()) <= 16) mobs.add((Mob) entity);
             }
         }
         return mobs;
