@@ -566,8 +566,9 @@ public class Castle implements Serializable {
 
     public void shootArrow(LivingEntity entity) {
         Vector direction = entity.getLocation().subtract(getLocation()).toVector().normalize();
-        Arrow arrow = getLocation().getWorld().spawnArrow(getLocation().add(0, 1, 0),  direction, 1, 100);
-        arrow.setVelocity(direction.multiply(2));
+        Arrow arrow = getLocation().getWorld().spawnArrow(getLocation().add(0, 1, 0),  direction, 1, 12);
+        arrow.setVelocity(direction.multiply(1.5));
+        arrow.setLifetimeTicks(20 * 5);
         arrow.setShooter(getCore());
     }
 
