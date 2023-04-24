@@ -8,21 +8,26 @@ import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Team;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import static castles.castles.Castles.killerVictims;
 import static castles.castles.Castles.plugin;
 import static castles.castles.Utils.*;
 import static castles.castles.localization.Phrase.*;
+import static castles.castles.scheduler.CorePattern.registerCorePattern;
 
 public class Schedules {
     public static NamespacedKey cooldownKey = new NamespacedKey(plugin, "COOLDOWN");
     private static String nextState;
     private static LocalDateTime nextTime;
     private static LocalDateTime nextMidnight;
+    public static Map<Castle, BukkitTask[]> corePatterns = new HashMap<>();
 
 
     private static void teleportCooldown() {
@@ -124,6 +129,9 @@ public class Schedules {
 
     public static void run() {
         setNextState();
+        for (Castle castle : Castles.castles) {
+            corePatterns.put(castle, registerCorePattern(castle));
+        }
         Scheduler.scheduleSyncRepeatingTask(() -> {
             teleportCooldown();
             updateState();

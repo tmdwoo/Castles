@@ -24,6 +24,7 @@ import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +37,8 @@ import java.util.*;
 import static castles.castles.Castles.plugin;
 import static castles.castles.Utils.*;
 import static castles.castles.localization.Phrase.*;
+import static castles.castles.scheduler.CorePattern.registerCorePattern;
+import static castles.castles.scheduler.Schedules.corePatterns;
 import static java.lang.Math.max;
 
 public class Castle implements Serializable {
@@ -85,6 +88,7 @@ public class Castle implements Serializable {
             setCore();
             setRampart();
             Castles.castles.add(this);
+            corePatterns.put(this, registerCorePattern(this));
         }
     }
 
@@ -307,6 +311,9 @@ public class Castle implements Serializable {
         for (Map<String, Object> beds : flags.get("fences")) {
             Location bedLocation = Location.deserialize(beds);
             bedLocation.getBlock().setType(Material.AIR);
+        }
+        for (BukkitTask task : corePatterns.get(this)) {
+            task.cancel();
         }
     }
 
@@ -539,36 +546,13 @@ public class Castle implements Serializable {
                 for (Player player : getPlayersInCastle()) player.sendActionBar(formatComponent(Component.text(String.format(CASTLE_CORE_HEALTH.getPhrase(player), (int) coreHealth, (int) getCoreMaxHealth())), getComponent(player)));
             }
         }
-        List<LivingEntity> entities = new ArrayList<>();
-        entities.addAll(getMobsInCastle());
-        entities.addAll(getPlayersInCastle());
-        for (LivingEntity entity : entities) {
-            if (getOwner() == null || !(entity instanceof Player && getOwner().hasPlayer((Player) entity))) {
-                //TODO: Add attack paterns
-                if (levels.get("core") >= 1) {
-                    shootArrow(entity);
-                }
-                if (levels.get("core") >= 2) {
-                    shootShulkerBullet(entity);
-                }
-                if (levels.get("core") >= 3) {
-                    summonEvokerFangs(entity);
-                }
-                if (levels.get("core") >= 4) {
-                    summonVex(entity);
-                }
-                if (levels.get("core") >= 5) {
-                    summonAreaCloudEffect(entity);
-                }
-            }
-        }
     }
 
     public void shootArrow(LivingEntity entity) {
         Vector direction = entity.getLocation().subtract(getLocation()).toVector().normalize();
         Arrow arrow = getLocation().getWorld().spawnArrow(getLocation().add(0, 1, 0),  direction, 1, 12);
         arrow.setVelocity(direction.multiply(1.5));
-        arrow.setLifetimeTicks(20 * 5);
+        arrow.setLifetimeTicks(20 * 3);
         arrow.setShooter(getCore());
     }
 
@@ -578,10 +562,9 @@ public class Castle implements Serializable {
         bullet.setShooter(getCore());
     }
 
-    public void summonAreaCloudEffect(LivingEntity entity) {
-        Vector direction = entity.getLocation().subtract(getLocation()).toVector().normalize();
-        AreaEffectCloud cloud = getLocation().getWorld().spawn(getLocation().add(direction), AreaEffectCloud.class);
-        cloud.setRadius(1);
+    public void summonIceField(LivingEntity entity) {
+        AreaEffectCloud cloud = getLocation().getWorld().spawn(entity.getLocation(), AreaEffectCloud.class);
+        cloud.setRadius(5);
         cloud.setRadiusOnUse(-0.1f);
         cloud.setDuration(20 * 5);
         cloud.setParticle(Particle.BLOCK_CRACK, Material.ICE.createBlockData());
@@ -589,6 +572,20 @@ public class Castle implements Serializable {
         cloud.setReapplicationDelay(20 * 5);
         cloud.setBasePotionData(new PotionData(PotionType.SLOWNESS));
         cloud.setSource(getCore());
+    }
+
+    public void summonToxicField(LivingEntity entity) {
+        AreaEffectCloud cloud = getLocation().getWorld().spawn(entity.getLocation(), AreaEffectCloud.class);
+        cloud.setRadius(5);
+        cloud.setRadiusOnUse(-0.1f);
+        cloud.setDuration(20 * 5);
+        cloud.setParticle(Particle.BLOCK_CRACK, Material.WEATHERED_COPPER.createBlockData());
+        cloud.setDurationOnUse(20 * 5);
+        cloud.setReapplicationDelay(20 * 5);
+        cloud.setSource(getCore());
+        Scheduler.scheduleSyncDelayedTask(() -> {
+            cloud.setBasePotionData(new PotionData(PotionType.POISON));
+        }, 20);
     }
 
     public void summonEvokerFangs(LivingEntity entity) {
