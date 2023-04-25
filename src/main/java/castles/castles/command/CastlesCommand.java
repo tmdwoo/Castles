@@ -17,6 +17,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.Team;
@@ -32,6 +33,7 @@ import java.util.regex.Pattern;
 
 import static castles.castles.Castles.teleportWarmup;
 import static castles.castles.Utils.*;
+import static castles.castles.item.Items.getItemCore;
 import static castles.castles.localization.Phrase.*;
 import static castles.castles.scheduler.Schedules.cooldownKey;
 import static java.lang.Math.round;
@@ -755,6 +757,42 @@ public class CastlesCommand implements CommandExecutor {
         sender.sendMessage(formatComponent(Component.text(String.format(CASTLES_RAMPART_HEALTH.getPhrase(sender), health)), castle.getComponent(sender)));
     }
 
+    private void item(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, int index) {
+        if (sender instanceof Player && !sender.hasPermission("castles.castles.item")) {
+            error(sender, label, args, index - 1, INCORRECT_ARGUMENT);
+            return;
+        }
+        if (args.length < index) {
+            error(sender, label, args, index, UNKNOWN_COMMAND);
+            return;
+        } else if (args.length > index) {
+            error(sender, label, args, index, INCORRECT_ARGUMENT);
+            return;
+        }
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(Component.text(REQUIRE_PLAYER.getPhrase(sender), NamedTextColor.RED));
+            return;
+        }
+        Player player = (Player) sender;
+        Team team = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
+        ItemStack core = getItemCore();
+        if (!player.hasPermission("castles.castles.item.ignoreBP")) {
+            if (team == null || getScore(team) < 50) {
+                sender.sendMessage(Component.text(BP_NOT_ENOUGH.getPhrase(sender), NamedTextColor.RED));
+                return;
+            } else {
+                setScore(team, getScore(team) - 50);
+            }
+        }
+        if (player.getInventory().contains(core)) {
+            ((Player) sender).getInventory().addItem(core);
+        } else if (player.getInventory().firstEmpty() == -1) {
+            ((Player) sender).getWorld().dropItemNaturally(((Player) sender).getLocation(), core);
+        } else {
+            ((Player) sender).getInventory().addItem(core);
+        }
+    }
+
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] rawArgs) {
@@ -800,6 +838,10 @@ public class CastlesCommand implements CommandExecutor {
                 }
                 case "rampart": {
                     rampart(sender, label, args, 1);
+                    break;
+                }
+                case "item": {
+                    item(sender, label, args, 1);
                     break;
                 }
                 default: {

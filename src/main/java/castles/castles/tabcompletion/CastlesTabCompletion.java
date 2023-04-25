@@ -28,7 +28,8 @@ public class CastlesTabCompletion implements TabCompleter {
             Map.entry("tp", new ArrayList<>(Arrays.asList("teleport.any", "teleport.own"))),
             Map.entry("modify", new ArrayList<>(List.of("modify"))),
             Map.entry("core", new ArrayList<>(List.of("core"))),
-            Map.entry("rampart", new ArrayList<>(List.of("rampart")))
+            Map.entry("rampart", new ArrayList<>(List.of("rampart"))),
+            Map.entry("item", new ArrayList<>(List.of("item")))
             );
 
     public @Nullable String getCastleCompletion(Castle castle, String arg) {
