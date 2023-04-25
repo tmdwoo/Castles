@@ -1,7 +1,6 @@
 package castles.castles.gui;
 
 import castles.castles.Castle;
-import castles.castles.Utils.*;
 import castles.castles.config.Config;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -117,6 +116,7 @@ public class CoreGuiHandler implements Listener {
             Entity core = event.getRightClicked();
             Castle castle = getCastleByName(core.getPersistentDataContainer().get(castlesKey, PersistentDataType.STRING));
             Player player = event.getPlayer();
+            if (!player.hasPermission("castles.openGUI")) return;
             Team team = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
             if (team == null || !Objects.equals(team, castle.getOwner())) return;
             player.openInventory(getCoreGui(player, castle));
