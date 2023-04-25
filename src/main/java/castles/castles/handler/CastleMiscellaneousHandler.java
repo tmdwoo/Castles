@@ -53,7 +53,7 @@ public class CastleMiscellaneousHandler implements Listener {
 
     @EventHandler
     public void onPlayerSetSpawn(PlayerSetSpawnEvent event) {
-        if (event.getCause().equals(PlayerSetSpawnEvent.Cause.BED) || event.getCause().equals(PlayerSetSpawnEvent.Cause.RESPAWN_ANCHOR)) {
+        if (event.getCause().equals(PlayerSetSpawnEvent.Cause.BED) || event.getCause().equals(PlayerSetSpawnEvent.Cause.RESPAWN_ANCHOR) || event.getCause().equals(PlayerSetSpawnEvent.Cause.PLAYER_RESPAWN)) {
             event.setCancelled(true);
         }
     }
