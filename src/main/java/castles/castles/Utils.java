@@ -1103,6 +1103,28 @@ public class Utils {
     }
 
     /**
+     * Get the team castle nearest to the given player.
+     * @param player The player to check
+     * @return The team castle nearest to the given player or null if no team castle exists
+     */
+    public static @Nullable Castle getNearestTeamCastle(Player player) {
+        Castle nearestCastle = null;
+        double nearestDistance = Double.MAX_VALUE;
+        Team team = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
+        for (Castle castle : Castles.castles) {
+            if (!Objects.equals(castle.getOwner(), team)) {
+                continue;
+            }
+            double distance = castle.getLocation().distance(player.getLocation());
+            if (distance < nearestDistance) {
+                nearestCastle = castle;
+                nearestDistance = distance;
+            }
+        }
+        return nearestCastle;
+    }
+
+    /**
      * Get the castle nearest to the given player.
      * @param location The location to check
      * @return The castle nearest to the given player or null if no castle exists
