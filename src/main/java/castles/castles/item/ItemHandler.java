@@ -29,6 +29,15 @@ import static castles.castles.localization.Phrase.*;
 
 public class ItemHandler implements Listener {
     private final NamespacedKey createCastleKey = new NamespacedKey(plugin, "createCastle");
+    public void returnCore(Player player) {
+        if (player.getInventory().contains(getItemCore())) {
+            player.getInventory().addItem(getItemCore());
+        } else if (player.getInventory().firstEmpty() != -1) {
+            player.getInventory().addItem(getItemCore());
+        } else {
+            player.getWorld().dropItemNaturally(player.getLocation(), getItemCore());
+        }
+    }
     private void createCastle(Location location, Player player) {
         /*
         TODO: create castle 함수
@@ -39,37 +48,35 @@ public class ItemHandler implements Listener {
         */
         if (!location.getWorld().getEnvironment().equals(World.Environment.NORMAL)) {
             player.sendMessage(Component.text("You can only build a castle in the overworld", NamedTextColor.RED));
+            returnCore(player);
             return;
         }
         if (getCastleByLocation(location) != null) {
             player.sendMessage(Component.text(CASTLE_ALREADY_IN_CHUNK.getPhrase(player), NamedTextColor.RED));
+            returnCore(player);
             return;
         }
         Utils.WorldEnv worldEnv = getWorldEnv(location.getWorld());
         if (location.getY() < worldEnv.getMinY() || location.getY() > worldEnv.getMaxY()) {
             player.sendMessage(Component.text(String.format(Y_COORD_OUT_OF_RANGE.getPhrase(player), worldEnv.getMinY(), worldEnv.getMaxY()), NamedTextColor.RED));
+            returnCore(player);
             return;
         }
         if (getMod(location.getX(), 16) < 1.5 || getMod(location.getX(), 16) > 14.5 || getMod(location.getZ(), 16) < 1.5 || getMod(location.getZ(), 16) > 14.5) {
             player.sendMessage(Component.text(CORE_ON_EDGE.getPhrase(player), NamedTextColor.RED));
+            returnCore(player);
             return;
         }
         if (player.getPersistentDataContainer().has(createCastleKey, PersistentDataType.STRING)) {
             player.sendMessage(Component.text("You are already creating a castle", NamedTextColor.RED));
+            returnCore(player);
             return;
         }
-        BukkitTask createCastle = Scheduler.scheduleAsyncDelayedTask(() -> {
+        player.sendMessage(Component.text("Type the name of the castle in chat in 15 seconds", NamedTextColor.GRAY));
+        BukkitTask createCastle = Scheduler.scheduleSyncDelayedTask(() -> {
             player.sendMessage(Component.text("Creating castle cancelled due to timeout", NamedTextColor.RED));
             player.getPersistentDataContainer().remove(createCastleKey);
-            // check if player inventory has core and count is not 64
-            if (player.getInventory().contains(getItemCore())) {
-                player.getInventory().addItem(getItemCore());
-            } else if (player.getInventory().firstEmpty() != -1) {
-                player.getInventory().addItem(getItemCore());
-            } else {
-                player.getWorld().dropItemNaturally(player.getLocation(), getItemCore());
-            }
-            player.getInventory().addItem(getItemCore());
+            returnCore(player);
         }, 20 * 15);
         String key = String.join(",", String.valueOf(createCastle.getTaskId()), String.valueOf(location.getX()), String.valueOf(location.getY()), String.valueOf(location.getZ()));
         player.getPersistentDataContainer().set(createCastleKey, PersistentDataType.STRING, key);
@@ -81,11 +88,12 @@ public class ItemHandler implements Listener {
         Player player = event.getPlayer();
         if (!Objects.equals(event.getHand(), EquipmentSlot.HAND)) return;
         if (player.getInventory().getItemInMainHand().isSimilar(getItemCore())) {
+            event.setCancelled(true);
             player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
             Location location = event.getClickedBlock().getLocation().add(event.getBlockFace().getDirection());
             createCastle(location, player);
-            event.setCancelled(true);
         } else if (player.getInventory().getItemInOffHand().isSimilar(getItemCore())) {
+            event.setCancelled(true);
             player.getInventory().getItemInOffHand().setAmount(player.getInventory().getItemInOffHand().getAmount() - 1);
             Location location = event.getClickedBlock().getLocation().add(event.getBlockFace().getDirection());
             createCastle(location, player);
@@ -101,17 +109,21 @@ public class ItemHandler implements Listener {
         int taskId = Integer.parseInt(key[0]);
         BukkitTask createCastle = Bukkit.getScheduler().getPendingTasks().stream().filter(task -> task.getTaskId() == taskId).findFirst().orElse(null);
         if (createCastle == null) return;
-        Location location = new Location(player.getWorld(), Integer.parseInt(key[1]), Integer.parseInt(key[2]), Integer.parseInt(key[3]));
+        event.setCancelled(true);
+        Location location = new Location(player.getWorld(), Double.parseDouble(key[1]) + 0.5, Double.parseDouble(key[2]), Double.parseDouble(key[3]) + 0.5);
         String name = ((TextComponent) event.message()).content();
         if (name.contains("\"")) {
             player.sendMessage(Component.text(NAME_DOUBLE_QUOTE.getPhrase(player), NamedTextColor.RED));
+            returnCore(player);
             return;
         }
         if (getCastleByName(name) != null) {
             player.sendMessage(Component.text(NAME_DUPLICATE.getPhrase(player), NamedTextColor.RED));
+            returnCore(player);
             return;
         }
         Team team = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
-        new Castle(name, location, team);
+        Scheduler.scheduleSyncDelayedTask(() -> new Castle(name, location, team), 0);
+        player.sendMessage(formatComponent(Component.text(CASTLES_CREATE.getPhrase(player)), getCastleByName(name).getComponent(player)));
     }
 }
