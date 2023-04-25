@@ -203,8 +203,7 @@ public class Castle implements Serializable {
         setOwner(team);
         if (team != null) {
             for (Player player : getPlayersInCastle()) {
-                Team playerTeam = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
-                if (team.equals(playerTeam)) player.setBedSpawnLocation(getLocation(), true);
+                if (team.hasPlayer(player)) player.setBedSpawnLocation(getLocation(), true);
             }
         }
         getLocation().getWorld().spawnParticle(Particle.ELECTRIC_SPARK, getLocation(), 100, 0.5, 0.5, 0.5, 0.1);
@@ -553,12 +552,14 @@ public class Castle implements Serializable {
         Arrow arrow = getLocation().getWorld().spawnArrow(getLocation().add(0, 1, 0),  direction, 1, 12);
         arrow.setVelocity(direction.multiply(1.5));
         arrow.setLifetimeTicks(20 * 3);
+        arrow.getPersistentDataContainer().set(castlesKey, PersistentDataType.STRING, name);
         arrow.setShooter(getCore());
     }
 
     public void shootShulkerBullet(LivingEntity entity) {
         ShulkerBullet bullet = getLocation().getWorld().spawn(getLocation().add(0, 1, 0), ShulkerBullet.class);
         bullet.setTarget(entity);
+        bullet.getPersistentDataContainer().set(castlesKey, PersistentDataType.STRING, name);
         bullet.setShooter(getCore());
     }
 
@@ -571,6 +572,7 @@ public class Castle implements Serializable {
         cloud.setDurationOnUse(20 * 5);
         cloud.setReapplicationDelay(20 * 5);
         cloud.setBasePotionData(new PotionData(PotionType.SLOWNESS));
+        cloud.getPersistentDataContainer().set(castlesKey, PersistentDataType.STRING, name);
         cloud.setSource(getCore());
     }
 
@@ -582,6 +584,7 @@ public class Castle implements Serializable {
         cloud.setParticle(Particle.BLOCK_CRACK, Material.WEATHERED_COPPER.createBlockData());
         cloud.setDurationOnUse(20 * 5);
         cloud.setReapplicationDelay(20 * 5);
+        cloud.getPersistentDataContainer().set(castlesKey, PersistentDataType.STRING, name);
         cloud.setSource(getCore());
         Scheduler.scheduleSyncDelayedTask(() -> {
             cloud.setBasePotionData(new PotionData(PotionType.POISON));
@@ -593,6 +596,7 @@ public class Castle implements Serializable {
         Location location = getLocation();
         Scheduler.scheduleSyncRepeatingTask(() -> {
             EvokerFangs fang = location.getWorld().spawn(location.add(direction), EvokerFangs.class);
+            fang.getPersistentDataContainer().set(castlesKey, PersistentDataType.STRING, name);
             fang.setOwner(getCore());
         }, 0, 2, 9);
     }
@@ -601,6 +605,7 @@ public class Castle implements Serializable {
         Location location = getLocation();
         Vex vex = location.getWorld().spawn(location, Vex.class);
         vex.setTarget(entity);
+        vex.getPersistentDataContainer().set(castlesKey, PersistentDataType.STRING, name);
         getOwner().addEntity(vex);
         Scheduler.scheduleSyncDelayedTask(() -> {
             vex.remove();
@@ -615,14 +620,14 @@ public class Castle implements Serializable {
         return players;
     }
 
-    public List<Mob> getMobsInCastle() {
-        List<Mob> mobs = new ArrayList<>();
+    public List<Monster> getMonstersInCastle() {
+        List<Monster> monsters = new ArrayList<>();
         for (ChunkPos chunkPos : chunks) {
             for (Entity entity : chunkPos.getChunk().getEntities()) {
-                if (entity instanceof Mob && !getCore().equals(entity) && !entity.getType().equals(EntityType.VEX) && getCore().getLocation().distance(entity.getLocation()) <= 16) mobs.add((Mob) entity);
+                if (entity instanceof Monster && !getCore().equals(entity) && !entity.getType().equals(EntityType.VEX) && getCore().getLocation().distance(entity.getLocation()) <= 16) monsters.add((Monster) entity);
             }
         }
-        return mobs;
+        return monsters;
     }
 
     /**

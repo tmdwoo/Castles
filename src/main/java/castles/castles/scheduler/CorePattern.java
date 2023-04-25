@@ -16,7 +16,7 @@ public class CorePattern {
         AtomicReference<List<LivingEntity>> entities = new AtomicReference<>(new ArrayList<>());
         BukkitTask entityListUpdate = scheduleSyncRepeatingTask(() -> {
             List<LivingEntity> list = new ArrayList<>();
-            list.addAll(castle.getMobsInCastle());
+            list.addAll(castle.getMonstersInCastle());
             list.addAll(castle.getPlayersInCastle());
             list.removeIf(entity -> castle.getOwner() != null && (entity instanceof Player && castle.getOwner().hasPlayer((Player) entity)) || entity.isDead() || entity.isInvulnerable());
             entities.set(list);

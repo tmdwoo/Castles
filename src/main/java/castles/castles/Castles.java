@@ -34,6 +34,7 @@ public final class Castles extends JavaPlugin {
     public void onEnable() {
         plugin = this;
         getServer().getPluginManager().registerEvents(new CoreAttackHandler(), this);
+        getServer().getPluginManager().registerEvents(new CorePatternHandler(), this);
         getServer().getPluginManager().registerEvents(new CastleRampartHandler(), this);
         getServer().getPluginManager().registerEvents(new CastleChunkHandler(), this);
         getServer().getPluginManager().registerEvents(new CastleProtectionHandler(), this);
