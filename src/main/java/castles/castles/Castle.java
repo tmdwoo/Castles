@@ -249,9 +249,9 @@ public class Castle implements Serializable {
     }
 
     public void setOwner(Team owner) {
-        Castle nearestCastle = getNearestCastle(getLocation());
         for (OfflinePlayer player : getOwner().getPlayers()) {
             if (player.isOnline() && Objects.equals(getCastleByLocation(player.getBedSpawnLocation()), this)) {
+                Castle nearestCastle = getNearestTeamCastle(player.getPlayer());
                 ((Player) player).setBedSpawnLocation(nearestCastle == null ? null : nearestCastle.getLocation(), true);
             }
         }

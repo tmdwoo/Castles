@@ -14,7 +14,7 @@ import org.bukkit.scoreboard.Team;
 import java.util.Objects;
 
 import static castles.castles.Utils.getCastleByLocation;
-import static castles.castles.Utils.getNearestCastle;
+import static castles.castles.Utils.getNearestTeamCastle;
 
 public class CastleMiscellaneousHandler implements Listener {
     // boss bar
@@ -75,7 +75,7 @@ public class CastleMiscellaneousHandler implements Listener {
         Castle spawnCastle = getCastleByLocation(event.getPlayer().getBedSpawnLocation());
         Team team = event.getPlayer().getScoreboard().getPlayerTeam(event.getPlayer());
         if (team != null && (spawnCastle == null || !Objects.equals(team, spawnCastle.getOwner()))) {
-            Castle nearestCastle = getNearestCastle(event.getPlayer().getLocation());
+            Castle nearestCastle = getNearestTeamCastle(event.getPlayer());
             event.getPlayer().setBedSpawnLocation(nearestCastle == null ? null : nearestCastle.getLocation(), true);
         }
     }
