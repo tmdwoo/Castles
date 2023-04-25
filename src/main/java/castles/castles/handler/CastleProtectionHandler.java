@@ -63,7 +63,7 @@ public class CastleProtectionHandler implements Listener {
 
     boolean isFlag(@NotNull Location location, @Nullable Castle castle) {
         if (castle != null) {
-            return castle.flags.get("wools").contains(location.serialize()) || castle.flags.get("fences").contains(location.serialize());
+            return castle.flags.get("wools").contains(location.serialize()) || castle.flags.get("fences").contains(location.serialize()) || castle.flags.get("blanks").contains(location.serialize());
         }
         return false;
     }

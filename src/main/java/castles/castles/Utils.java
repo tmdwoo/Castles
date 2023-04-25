@@ -784,6 +784,7 @@ public class Utils {
     public static HashMap<String, List<Map<String, Object>>> buildFlag(@NotNull Location location, @Nullable Team team) {
         List<Map<String, Object>> fences = new ArrayList<>();
         List<Map<String, Object>> wools = new ArrayList<>();
+        List<Map<String, Object>> blanks = new ArrayList<>();
         final World world = location.getWorld();
         final int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
         WorldEnv worldEnv = getWorldEnv(world);
@@ -799,8 +800,8 @@ public class Utils {
         Material wool = DyeColor2Wool.get(t2dColorMap.get(team != null && team.hasColor() ? team.color() : NamedTextColor.WHITE));
         Block cursor = world.getBlockAt(x, y - 1, z);
         wools.add(cursor.getLocation().serialize());
-        wools.add(cursor.getLocation().add(0, 1, 0).serialize());
-        wools.add(cursor.getLocation().add(0, 2, 0).serialize());
+        blanks.add(cursor.getLocation().add(0, 1, 0).serialize());
+        blanks.add(cursor.getLocation().add(0, 2, 0).serialize());
         cursor.setType(wool);
         double[] flagEnd = getLineForward(location.getX(), location.getZ(), location.getX() - getMod(location.getX(), CHUNK_SIZE) + 8, location.getZ() -  getMod(location.getZ(), CHUNK_SIZE) + 8, 8);
         int[][] flags = getLineCoordinates(location.getX(), location.getZ(), flagEnd[0], flagEnd[1]);
@@ -853,6 +854,7 @@ public class Utils {
         HashMap<String, List<Map<String, Object>>> result = new HashMap<>();
         result.put("fences", fences);
         result.put("wools", wools);
+        result.put("blanks", blanks);
         return result;
     }
 
