@@ -25,7 +25,7 @@ import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.*;
 
 public class CoreAttackHandler implements Listener {
 
-    public final List<DamageCause> damageExceptionList = Arrays.asList(CONTACT, SUFFOCATION, FALL, DRAGON_BREATH, FIRE, FALLING_BLOCK, MELTING, LAVA, DROWNING, VOID, SUICIDE, STARVATION, FLY_INTO_WALL, HOT_FLOOR, CRAMMING, DRYOUT, FREEZE);
+    public final List<DamageCause> damageExceptionList = Arrays.asList(CONTACT, SUFFOCATION, FALL, DRAGON_BREATH, FIRE, MELTING, LAVA, DROWNING, VOID, SUICIDE, STARVATION, FLY_INTO_WALL, HOT_FLOOR, CRAMMING, DRYOUT, FREEZE);
 
     boolean isCastleProtected(@NotNull Castle castle) {
         Team t = castle.getOwner();
