@@ -94,21 +94,21 @@ public class CastleMiscellaneousHandler implements Listener {
             Team team = Bukkit.getScoreboardManager().getMainScoreboard().getTeam(args[2]);
             if (args.length == 5 && args[1].equals("modify")) {
                 if (team == null) return;
-                Scheduler.scheduleAsyncDelayedTask(() -> {
+                Scheduler.scheduleSyncDelayedTask(() -> {
                     for (Castle castle : Castles.castles) {
                         castle.setOwner(castle.getOwner());
                     }
                 }, 1);
             } else if (args.length == 3 && args[1].equals("remove")) {
                 if (team == null) return;
-                Scheduler.scheduleAsyncDelayedTask(() -> {
+                Scheduler.scheduleSyncDelayedTask(() -> {
                     for (Castle castle : Castles.castles) {
                         castle.setOwner(castle.getOwner());
                     }
                 }, 1);
             } else if ((args.length == 3 || args.length == 4) && args[1].equals("add")) {
                 if (team != null) return;
-                Scheduler.scheduleAsyncDelayedTask(() -> {
+                Scheduler.scheduleSyncDelayedTask(() -> {
                     for (Castle castle : Castles.castles) {
                         castle.setOwner(castle.getOwner());
                     }
@@ -124,21 +124,21 @@ public class CastleMiscellaneousHandler implements Listener {
             Team team = Bukkit.getScoreboardManager().getMainScoreboard().getTeam(args[2]);
             if (args.length == 5 && args[1].equals("modify")) {
                 if (team == null) return;
-                Scheduler.scheduleAsyncDelayedTask(() -> {
+                Scheduler.scheduleSyncDelayedTask(() -> {
                     for (Castle castle : Castles.castles) {
                         castle.setOwner(castle.getOwner());
                     }
                 }, 1);
             } else if (args.length == 3 && args[1].equals("remove")) {
                 if (team == null) return;
-                Scheduler.scheduleAsyncDelayedTask(() -> {
+                Scheduler.scheduleSyncDelayedTask(() -> {
                     for (Castle castle : Castles.castles) {
                         castle.setOwner(castle.getOwner());
                     }
                 }, 1);
             } else if ((args.length == 3 || args.length == 4) && args[1].equals("add")) {
                 if (team != null) return;
-                Scheduler.scheduleAsyncDelayedTask(() -> {
+                Scheduler.scheduleSyncDelayedTask(() -> {
                     for (Castle castle : Castles.castles) {
                         castle.setOwner(castle.getOwner());
                     }
