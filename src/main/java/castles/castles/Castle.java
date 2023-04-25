@@ -103,14 +103,13 @@ public class Castle implements Serializable {
         return bossBar;
     }
 
-    private void setCore() {
-        LivingEntity entity = (LivingEntity) getLocation().getWorld().spawnEntity(getLocation(), EntityType.BLAZE);
-        if (coreUUID != null) {
-            Entity core = getLocation().getWorld().getEntity(coreUUID);
-            if (core != null && core != entity) {
-                core.remove();
+    private LivingEntity setCore() {
+        for (Entity preCore : chunks.get(0).getChunk().getEntities()) {
+            if (preCore.getPersistentDataContainer().has(Utils.castlesKey, PersistentDataType.STRING) && preCore.getPersistentDataContainer().get(Utils.castlesKey, PersistentDataType.STRING).equals(name)) {
+                preCore.remove();
             }
         }
+        LivingEntity entity = (LivingEntity) getLocation().getWorld().spawnEntity(getLocation(), EntityType.BLAZE);
         entity.teleport(getLocation());
         Team owner = this.getOwner();
         Component coreName = Component.text(this.name, owner != null ? (owner.hasColor() ? owner.color() : null) : null);
@@ -127,6 +126,7 @@ public class Castle implements Serializable {
         entity.setHealth(1024);
         entity.getPersistentDataContainer().set(Utils.castlesKey, PersistentDataType.STRING, name);
         coreUUID = entity.getUniqueId();
+        return entity;
     }
 
     public void setCoreLevel(int level) {
@@ -186,8 +186,20 @@ public class Castle implements Serializable {
         getCore().setHealth(1024);
     }
 
-    public LivingEntity getCore() {
-        return (LivingEntity) getLocation().getWorld().getEntity(coreUUID);
+    public @NotNull LivingEntity getCore() {
+        LivingEntity core = (LivingEntity) getLocation().getWorld().getEntity(coreUUID);
+        if (core == null) {
+            for (Entity entity : chunks.get(0).getChunk().getEntities()) {
+                if (!entity.getPersistentDataContainer().has(Utils.castlesKey, PersistentDataType.STRING)) continue;
+                if (Objects.equals(entity.getPersistentDataContainer().get(Utils.castlesKey, PersistentDataType.STRING), name)) {
+                    core = (LivingEntity) entity;
+                    coreUUID = core.getUniqueId();
+                    return core;
+                }
+            }
+            core = setCore();
+        }
+        return core;
     }
 
     public void occupy(@Nullable Team team, @NotNull Player damager) {
