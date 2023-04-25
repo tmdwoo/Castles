@@ -63,6 +63,9 @@ permissions:
   castles.castles.item.ignoreBP:
     description: Give Core item command without BP
     default: op
+  castles.bypass.protection:
+    description: Bypass protection
+    default: op
   castles.bloodpoints:
     description: Blood Points command
     default: op
