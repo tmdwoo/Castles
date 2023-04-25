@@ -57,6 +57,12 @@ permissions:
   castles.castles.state.change:
     description: Castles state change command
     default: op
+  castles.castles.item:
+    description: Give Core item command
+    default: op
+  castles.castles.item.ignoreBP:
+    description: Give Core item command without BP
+    default: op
   castles.bloodpoints:
     description: Blood Points command
     default: op
