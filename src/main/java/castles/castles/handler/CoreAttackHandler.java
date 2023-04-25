@@ -20,8 +20,7 @@ import java.util.Objects;
 
 import static castles.castles.Utils.castlesKey;
 import static castles.castles.Utils.getCastleByName;
-import static org.bukkit.entity.EntityType.AREA_EFFECT_CLOUD;
-import static org.bukkit.entity.EntityType.EVOKER_FANGS;
+import static org.bukkit.entity.EntityType.*;
 import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.*;
 
 public class CoreAttackHandler implements Listener {
@@ -65,7 +64,7 @@ public class CoreAttackHandler implements Listener {
 
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
-        if (event.getEntity().getPersistentDataContainer().has(castlesKey)) {
+        if (event.getEntity().getPersistentDataContainer().has(castlesKey) && event.getEntity().getType().equals(BLAZE)) {
             Entity core = event.getEntity();
             Castle castle = getCastleByName(core.getPersistentDataContainer().get(castlesKey, PersistentDataType.STRING));
             if (event.getCause().equals(DamageCause.ENTITY_ATTACK)) {
