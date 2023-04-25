@@ -191,6 +191,7 @@ public class Castle implements Serializable {
         if (core == null) {
             for (Entity entity : chunks.get(0).getChunk().getEntities()) {
                 if (!entity.getPersistentDataContainer().has(Utils.castlesKey, PersistentDataType.STRING)) continue;
+                if (!entity.getType().equals(EntityType.BLAZE)) continue;
                 if (Objects.equals(entity.getPersistentDataContainer().get(Utils.castlesKey, PersistentDataType.STRING), name)) {
                     core = (LivingEntity) entity;
                     coreUUID = core.getUniqueId();
