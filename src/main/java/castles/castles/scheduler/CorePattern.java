@@ -18,7 +18,7 @@ public class CorePattern {
             List<LivingEntity> list = new ArrayList<>();
             list.addAll(castle.getMonstersInCastle());
             list.addAll(castle.getPlayersInCastle());
-            list.removeIf(entity -> castle.getOwner() != null && (entity instanceof Player && castle.getOwner().hasPlayer((Player) entity)) || entity.isDead() || entity.isInvulnerable());
+            list.removeIf(entity -> castle.getOwner() != null && (entity instanceof Player && (castle.getOwner().hasPlayer((Player) entity) || entity.hasPermission("castles.bypass.protection"))) || entity.isDead() || entity.isInvulnerable());
             entities.set(list);
         }, 0, 10, 0);
 
