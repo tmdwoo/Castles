@@ -208,11 +208,12 @@ public class CoreGuiHandler implements Listener {
 
     @EventHandler
     public void onClickExpandCastleGui(InventoryClickEvent event) {
-        Player player = (Player) event.getWhoClicked();event.setCancelled(true);
+        Player player = (Player) event.getWhoClicked();
         String title =((TextComponent) event.getView().title()).content();
         if (!title.endsWith("Expand") || title.split(" ").length != 2) return;
         Castle castle = getCastleByName(title.split(" ")[0]);
         if (castle == null) return;
+        event.setCancelled(true);
         int slot = event.getSlot();
         int chunkX = slot % 9 - 4, chunkZ = slot / 9 - 4;
         ItemStack item = event.getCurrentItem();
