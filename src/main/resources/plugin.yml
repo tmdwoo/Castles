@@ -57,3 +57,6 @@ permissions:
   castles.bloodpoints:
     description: Blood Points command
     default: op
+  castles.openGUI:
+    description: Open GUI with interaction
+    default: op
