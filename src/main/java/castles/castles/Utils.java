@@ -220,9 +220,18 @@ public class Utils {
 
         public boolean isAdjacent(ChunkPos other) {
             if (other.world.equals(world) && !equals(other)) {
-                return Math.abs(other.x - x) <= 1 && Math.abs(other.z - z) <= 1;
+                return !(Math.abs(other.x - x) == 1 && Math.abs(other.z - z) == 1) && (Math.abs(other.x - x) <= 1 && Math.abs(other.z - z) <= 1);
             }
             return false;
+        }
+
+        public ChunkPos[] getAdjacent() {
+            return new ChunkPos[] {
+                    new ChunkPos(getWorld(), x - 1, z),
+                    new ChunkPos(getWorld(), x + 1, z),
+                    new ChunkPos(getWorld(), x, z - 1),
+                    new ChunkPos(getWorld(), x, z + 1)
+            };
         }
 
         @Override
@@ -1079,6 +1088,23 @@ public class Utils {
         String name = mChunk.getPersistentDataContainer().get(castlesKey, PersistentDataType.STRING);
         if (name != null) {
             return getCastleByName(name);
+        }
+        return null;
+    }
+
+    /**
+     * Get the castle with the give Component name.
+     * @param Component The Component name of the castle
+     * @return The castle at the given chunk or null if no castle exists at the given chunk
+     */
+    public static Castle getCastleByComponent(@Nullable Component Component) {
+        if (Component == null) {
+            return null;
+        }
+        for (Castle castle : castles) {
+            if (castle.getComponent().equals(Component)) {
+                return castle;
+            }
         }
         return null;
     }
