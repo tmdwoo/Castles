@@ -14,6 +14,7 @@ public class Lang_en_US {
         put(NAME_DUPLICATE, "A castle already exists by that name");
         put(NAME_DOUBLE_QUOTE, "Castle names cannot contain \"");
         put(REQUIRE_ENTITY, "An entity is required to run this command here");
+        put(REQUIRE_PLAYER, "A player is required to run this command");
         put(CASTLE_ALREADY_IN_CHUNK, "A castle already exists in this chunk");
         put(Y_COORD_OUT_OF_RANGE, "Y coordinate must be between %d and %d");
         put(CORE_ON_EDGE, "Core cannot be placed on the edge of a chunk");

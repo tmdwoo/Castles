@@ -61,12 +61,25 @@ public class CastleProtectionHandler implements Listener {
         return false;
     }
 
+    boolean isFlag(@NotNull Location location, @Nullable Castle castle) {
+        if (castle != null) {
+            return castle.flags.get("wools").contains(location.serialize()) || castle.flags.get("fences").contains(location.serialize()) || castle.flags.get("blanks").contains(location.serialize());
+        }
+        return false;
+    }
+
+    boolean isFlag(@NotNull Location location){
+        Castle castle = getCastleByLocation(location);
+        return isFlag(location, castle);
+    }
+
     boolean isLocationProtected(@Nullable Location location){
         if (location == null){
             return false;
         }
         Castle castle = getCastleByLocation(location);
         if (castle != null){
+            if (isFlag(location, castle)) return true;
             return isCastleProtected(castle);
         }
         return false;
@@ -76,8 +89,12 @@ public class CastleProtectionHandler implements Listener {
         if (player == null || location == null){
             return false;
         }
+        if (player.hasPermission("castles.bypass.protection")){
+            return false;
+        }
         Castle castle = getCastleByLocation(location);
         if (castle != null){
+            if (isFlag(location, castle)) return true;
             Team team = castle.getOwner();
             if (team != null && team.hasPlayer(player)){
                 return false;
@@ -90,6 +107,7 @@ public class CastleProtectionHandler implements Listener {
     boolean isOriginOutsideCastle(@NotNull Location target, @Nullable Location origin){
         Castle targetCastle = getCastleByLocation(target);
         Castle originCastle = getCastleByLocation(origin);
+        if (isFlag(target, targetCastle)) return true;
         if (originCastle != null){
             return targetCastle != originCastle;
         }

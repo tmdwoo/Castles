@@ -3,60 +3,21 @@ package castles.castles.handler;
 import castles.castles.Castle;
 import castles.castles.Castles;
 import castles.castles.scheduler.Scheduler;
-import org.bukkit.block.Block;
+import com.destroystokyo.paper.event.player.PlayerSetSpawnEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerCommandEvent;
+import org.bukkit.scoreboard.Team;
 
-import java.util.Iterator;
+import java.util.Objects;
 
 import static castles.castles.Utils.getCastleByLocation;
+import static castles.castles.Utils.getNearestTeamCastle;
 
 public class CastleMiscellaneousHandler implements Listener {
-    // protect flag
-    @EventHandler
-    public void onBlockBreak(BlockBreakEvent event){
-        Castle castle = getCastleByLocation(event.getBlock().getLocation());
-        if (castle != null) {
-            if (castle.flags.get("wools").contains(event.getBlock().getLocation().serialize()) || castle.flags.get("fences").contains(event.getBlock().getLocation().serialize())) {
-                event.setCancelled(true);
-            }
-        }
-    }
-
-    @EventHandler
-    public void onBlockExplode(BlockExplodeEvent event) {
-        Iterator<Block> iterator = event.blockList().iterator();
-        while (iterator.hasNext()) {
-            Block block = iterator.next();
-            Castle castle = getCastleByLocation(block.getLocation());
-            if (castle != null) {
-                if (castle.flags.get("wools").contains(block.getLocation().serialize()) || castle.flags.get("fences").contains(block.getLocation().serialize())) {
-                    iterator.remove();
-                }
-            }
-        }
-    }
-
-    @EventHandler
-    public void onEntityExplode(EntityExplodeEvent event) {
-        Iterator<Block> iterator = event.blockList().iterator();
-        while (iterator.hasNext()) {
-            Block block = iterator.next();
-            Castle castle = getCastleByLocation(block.getLocation());
-            if (castle != null) {
-                if (castle.flags.get("wools").contains(block.getLocation().serialize()) || castle.flags.get("fences").contains(block.getLocation().serialize())) {
-                    iterator.remove();
-                }
-            }
-        }
-    }
-
     // boss bar
     void updateBossBar(Castle fromCastle, Castle toCastle, Player player) {
         if (toCastle != null && fromCastle != null) {
@@ -71,12 +32,30 @@ public class CastleMiscellaneousHandler implements Listener {
         }
     }
 
+    void updateSpawnPoint(Castle fromCastle, Castle toCastle, Player player) {
+        if (toCastle == null) return;
+        if (Objects.equals(fromCastle, toCastle)) return;
+        Team team = player.getScoreboard().getPlayerTeam(player);
+        if (team == null) return;
+        if (Objects.equals(team, toCastle.getOwner())) {
+            player.setBedSpawnLocation(toCastle.getLocation());
+        }
+    }
+
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         if (!event.isCancelled()) {
             Castle toCastle = getCastleByLocation(event.getTo());
             Castle fromCastle = getCastleByLocation(event.getFrom());
             updateBossBar(fromCastle, toCastle, event.getPlayer());
+            updateSpawnPoint(fromCastle, toCastle, event.getPlayer());
+        }
+    }
+
+    @EventHandler
+    public void onPlayerSetSpawn(PlayerSetSpawnEvent event) {
+        if (event.getCause().equals(PlayerSetSpawnEvent.Cause.BED) || event.getCause().equals(PlayerSetSpawnEvent.Cause.RESPAWN_ANCHOR) || event.getCause().equals(PlayerSetSpawnEvent.Cause.PLAYER_RESPAWN)) {
+            event.setCancelled(true);
         }
     }
 
@@ -86,6 +65,7 @@ public class CastleMiscellaneousHandler implements Listener {
             Castle toCastle = getCastleByLocation(event.getTo());
             Castle fromCastle = getCastleByLocation(event.getFrom());
             updateBossBar(fromCastle, toCastle, event.getPlayer());
+            updateSpawnPoint(fromCastle, toCastle, event.getPlayer());
         }
     }
 
@@ -93,6 +73,12 @@ public class CastleMiscellaneousHandler implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Castle toCastle = getCastleByLocation(event.getPlayer().getLocation());
         updateBossBar(null, toCastle, event.getPlayer());
+        Castle spawnCastle = getCastleByLocation(event.getPlayer().getBedSpawnLocation());
+        Team team = event.getPlayer().getScoreboard().getPlayerTeam(event.getPlayer());
+        if (team != null && (spawnCastle == null || !Objects.equals(team, spawnCastle.getOwner()))) {
+            Castle nearestCastle = getNearestTeamCastle(event.getPlayer());
+            event.getPlayer().setBedSpawnLocation(nearestCastle == null ? null : nearestCastle.getLocation(), true);
+        }
     }
 
     @EventHandler
@@ -105,11 +91,29 @@ public class CastleMiscellaneousHandler implements Listener {
     public void onTeamChangeConsole(ServerCommandEvent event) {
         String[] args = event.getCommand().split(" ");
         if (args[0].equals("team") && args.length >= 3) {
-            Scheduler.scheduleSyncDelayedTask(() -> {
-                for (Castle castle : Castles.castles) {
-                    castle.setOwner(castle.getOwner());
-                }
-            }, 1);
+            Team team = Bukkit.getScoreboardManager().getMainScoreboard().getTeam(args[2]);
+            if (args.length == 5 && args[1].equals("modify")) {
+                if (team == null) return;
+                Scheduler.scheduleSyncDelayedTask(() -> {
+                    for (Castle castle : Castles.castles) {
+                        castle.setOwner(castle.getOwner());
+                    }
+                }, 1);
+            } else if (args.length == 3 && args[1].equals("remove")) {
+                if (team == null) return;
+                Scheduler.scheduleSyncDelayedTask(() -> {
+                    for (Castle castle : Castles.castles) {
+                        castle.setOwner(castle.getOwner());
+                    }
+                }, 1);
+            } else if ((args.length == 3 || args.length == 4) && args[1].equals("add")) {
+                if (team != null) return;
+                Scheduler.scheduleSyncDelayedTask(() -> {
+                    for (Castle castle : Castles.castles) {
+                        castle.setOwner(castle.getOwner());
+                    }
+                }, 1);
+            }
         }
     }
 
@@ -117,11 +121,29 @@ public class CastleMiscellaneousHandler implements Listener {
     public void onTeamChangePlayer(PlayerCommandPreprocessEvent event) {
         String[] args = event.getMessage().split(" ");
         if (args[0].equals("/team") && args.length >= 3) {
-            Scheduler.scheduleSyncDelayedTask(() -> {
-                for (Castle castle : Castles.castles) {
-                    castle.setOwner(castle.getOwner());
-                }
-            }, 1);
+            Team team = Bukkit.getScoreboardManager().getMainScoreboard().getTeam(args[2]);
+            if (args.length == 5 && args[1].equals("modify")) {
+                if (team == null) return;
+                Scheduler.scheduleSyncDelayedTask(() -> {
+                    for (Castle castle : Castles.castles) {
+                        castle.setOwner(castle.getOwner());
+                    }
+                }, 1);
+            } else if (args.length == 3 && args[1].equals("remove")) {
+                if (team == null) return;
+                Scheduler.scheduleSyncDelayedTask(() -> {
+                    for (Castle castle : Castles.castles) {
+                        castle.setOwner(castle.getOwner());
+                    }
+                }, 1);
+            } else if ((args.length == 3 || args.length == 4) && args[1].equals("add")) {
+                if (team != null) return;
+                Scheduler.scheduleSyncDelayedTask(() -> {
+                    for (Castle castle : Castles.castles) {
+                        castle.setOwner(castle.getOwner());
+                    }
+                }, 1);
+            }
         }
     }
 

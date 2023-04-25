@@ -7,6 +7,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.*;
@@ -220,9 +221,18 @@ public class Utils {
 
         public boolean isAdjacent(ChunkPos other) {
             if (other.world.equals(world) && !equals(other)) {
-                return Math.abs(other.x - x) <= 1 && Math.abs(other.z - z) <= 1;
+                return !(Math.abs(other.x - x) == 1 && Math.abs(other.z - z) == 1) && (Math.abs(other.x - x) <= 1 && Math.abs(other.z - z) <= 1);
             }
             return false;
+        }
+
+        public ChunkPos[] getAdjacent() {
+            return new ChunkPos[] {
+                    new ChunkPos(getWorld(), x - 1, z),
+                    new ChunkPos(getWorld(), x + 1, z),
+                    new ChunkPos(getWorld(), x, z - 1),
+                    new ChunkPos(getWorld(), x, z + 1)
+            };
         }
 
         @Override
@@ -774,6 +784,7 @@ public class Utils {
     public static HashMap<String, List<Map<String, Object>>> buildFlag(@NotNull Location location, @Nullable Team team) {
         List<Map<String, Object>> fences = new ArrayList<>();
         List<Map<String, Object>> wools = new ArrayList<>();
+        List<Map<String, Object>> blanks = new ArrayList<>();
         final World world = location.getWorld();
         final int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
         WorldEnv worldEnv = getWorldEnv(world);
@@ -789,6 +800,8 @@ public class Utils {
         Material wool = DyeColor2Wool.get(t2dColorMap.get(team != null && team.hasColor() ? team.color() : NamedTextColor.WHITE));
         Block cursor = world.getBlockAt(x, y - 1, z);
         wools.add(cursor.getLocation().serialize());
+        blanks.add(cursor.getLocation().add(0, 1, 0).serialize());
+        blanks.add(cursor.getLocation().add(0, 2, 0).serialize());
         cursor.setType(wool);
         double[] flagEnd = getLineForward(location.getX(), location.getZ(), location.getX() - getMod(location.getX(), CHUNK_SIZE) + 8, location.getZ() -  getMod(location.getZ(), CHUNK_SIZE) + 8, 8);
         int[][] flags = getLineCoordinates(location.getX(), location.getZ(), flagEnd[0], flagEnd[1]);
@@ -841,6 +854,7 @@ public class Utils {
         HashMap<String, List<Map<String, Object>>> result = new HashMap<>();
         result.put("fences", fences);
         result.put("wools", wools);
+        result.put("blanks", blanks);
         return result;
     }
 
@@ -934,6 +948,12 @@ public class Utils {
         return objective;
     }
 
+    public static int getScore(@NotNull Team team) {
+        Objective bloodPoints = getBloodPointsObjective();
+        Score score = bloodPoints.getScore(getDisplayName(team));
+        return score.getScore();
+    }
+
     public static void addScore(@Nullable Team team, int value) {
         if (team == null) return;
         Objective bloodPoints = getBloodPointsObjective();
@@ -974,13 +994,13 @@ public class Utils {
     }
 
     public static void saveVictims() {
-        File dir = new File("plugins/castles");
-        if (!dir.exists()) {
+        final File configFolder = plugin.getDataFolder();
+        if (!configFolder.exists()) {
             //noinspection ResultOfMethodCallIgnored
-            dir.mkdir();
+            configFolder.mkdir();
         }
         try {
-            final File dataFile = new File(dir, "Victims.dat");
+            final File dataFile = new File(configFolder, "Victims.dat");
             if (!dataFile.exists()) {
                 //noinspection ResultOfMethodCallIgnored
                 dataFile.createNewFile();
@@ -1021,13 +1041,14 @@ public class Utils {
     }
 
     public static void saveCastles() {
-        File dir = new File("plugins/castles");
-        if (!dir.exists()) {
+        final File configFolder = plugin.getDataFolder();
+        if (!configFolder.exists()) {
             //noinspection ResultOfMethodCallIgnored
-            dir.mkdir();
+            configFolder.mkdir();
         }
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream("plugins/castles/castles.dat");
+            final File dataFile = new File(configFolder, "castles.dat");
+            FileOutputStream fileOutputStream = new FileOutputStream(dataFile);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
             objectOutputStream.writeObject(castles);
             objectOutputStream.close();
@@ -1081,5 +1102,54 @@ public class Utils {
             return getCastleByName(name);
         }
         return null;
+    }
+
+    /**
+     * Get the team castle nearest to the given player.
+     * @param player The player to check
+     * @return The team castle nearest to the given player or null if no team castle exists
+     */
+    public static @Nullable Castle getNearestTeamCastle(Player player) {
+        Castle nearestCastle = null;
+        double nearestDistance = Double.MAX_VALUE;
+        Team team = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
+        for (Castle castle : Castles.castles) {
+            if (!Objects.equals(castle.getOwner(), team)) {
+                continue;
+            }
+            double distance = castle.getLocation().distance(player.getLocation());
+            if (distance < nearestDistance) {
+                nearestCastle = castle;
+                nearestDistance = distance;
+            }
+        }
+        return nearestCastle;
+    }
+
+    /**
+     * Get the castle nearest to the given player.
+     * @param location The location to check
+     * @return The castle nearest to the given player or null if no castle exists
+     */
+    public static @Nullable Castle getNearestCastle(Location location) {
+        Castle nearestCastle = null;
+        double nearestDistance = Double.MAX_VALUE;
+        for (Castle castle : Castles.castles) {
+            double distance = castle.getLocation().distance(location);
+            if (distance < nearestDistance) {
+                nearestCastle = castle;
+                nearestDistance = distance;
+            }
+        }
+        return nearestCastle;
+    }
+
+    /**
+     * Get the castle nearest to the given player.
+     * @param player The player to check
+     * @return The castle nearest to the given player or null if no castle exists
+     */
+    public static @Nullable Castle getNearestCastle(Player player) {
+        return getNearestCastle(player.getLocation());
     }
 }

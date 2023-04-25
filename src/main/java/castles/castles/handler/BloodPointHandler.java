@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.scoreboard.Team;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +31,7 @@ public class BloodPointHandler implements Listener {
         Team killerTeam = killer.getScoreboard().getPlayerTeam(killer);
         if (killerTeam == null) return;
         List<UUID> killerVictim = killerVictims.get(killer.getUniqueId());
+        if (killerVictim == null) killerVictim = new ArrayList<>();
         if (Collections.frequency(killerVictim, victim.getUniqueId()) >= Config.getGlobal().BP_MAX_PER_VICTIM) return;
         killerVictim.add(victim.getUniqueId());
         addScore(killerTeam, Config.getGlobal().BP_PER_KILL);

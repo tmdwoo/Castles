@@ -12,7 +12,8 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static castles.castles.Utils.getCastleByLocation;
@@ -56,35 +57,33 @@ public class CastleRampartHandler implements Listener {
 
     @EventHandler()
     public void onBlockExplode(BlockExplodeEvent event) {
-        Iterator<Block> iterator = event.blockList().iterator();
-        while (iterator.hasNext()) {
-            Block block = iterator.next();
-            Castle castle = getCastleByRampart(block);
+        List<Block> protectedBlocks = new ArrayList<>();
+        for (Block b : event.blockList()){
+            Castle castle = getCastleByRampart(b);
             if (castle == null) {
-                return;
+                continue;
             }
-            event.setCancelled(true);
             if (isCastleRampartDamageable(castle)) {
                 castle.damageRampart();
-                iterator.remove();
+                protectedBlocks.add(b);
             }
         }
+        event.blockList().removeAll(protectedBlocks);
     }
 
     @EventHandler()
     public void onEntityExplode(EntityExplodeEvent event) {
-        Iterator<Block> iterator = event.blockList().iterator();
-        while (iterator.hasNext()) {
-            Block block = iterator.next();
-            Castle castle = getCastleByRampart(block);
+        List<Block> protectedBlocks = new ArrayList<>();
+        for (Block b : event.blockList()){
+            Castle castle = getCastleByRampart(b);
             if (castle == null) {
-                return;
+                continue;
             }
-            event.setCancelled(true);
             if (isCastleRampartDamageable(castle)) {
                 castle.damageRampart();
-                iterator.remove();
+                protectedBlocks.add(b);
             }
         }
+        event.blockList().removeAll(protectedBlocks);
     }
 }

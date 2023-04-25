@@ -21,6 +21,9 @@ permissions:
   castles.castles.list:
     description: Castles list command
     default: true
+  castles.castles.list.all:
+    description: Castles list command
+    default: op
   castles.castles.reload:
     description: Castles reload command
     default: op
@@ -54,6 +57,18 @@ permissions:
   castles.castles.state.change:
     description: Castles state change command
     default: op
+  castles.castles.item:
+    description: Give Core item command
+    default: op
+  castles.castles.item.ignoreBP:
+    description: Give Core item command without BP
+    default: op
+  castles.bypass.protection:
+    description: Bypass protection
+    default: op
   castles.bloodpoints:
     description: Blood Points command
+    default: op
+  castles.openGUI:
+    description: Open GUI with interaction
     default: op

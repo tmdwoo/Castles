@@ -24,6 +24,7 @@ import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +37,8 @@ import java.util.*;
 import static castles.castles.Castles.plugin;
 import static castles.castles.Utils.*;
 import static castles.castles.localization.Phrase.*;
+import static castles.castles.scheduler.CorePattern.registerCorePattern;
+import static castles.castles.scheduler.Schedules.corePatterns;
 import static java.lang.Math.max;
 
 public class Castle implements Serializable {
@@ -51,9 +54,9 @@ public class Castle implements Serializable {
     public List<Map<String, Object>> crackedRampart = new ArrayList<>();
     public HashMap<Map<String, Object>, String> beforeRampart = new HashMap<>();
     public Integer protectionTime = 3600;
-    public double coreHealth = 100;
+    public double coreHealth;
     public int lastHit = 0;
-    public int rampartHealth = 100;
+    public int rampartHealth;
     public HashMap<String, Integer> levels = new HashMap<>();
 
     public Castle(String name, Location location) {
@@ -79,18 +82,25 @@ public class Castle implements Serializable {
             chunks.add(new ChunkPos(location));
             levels.put("core", 1);
             levels.put("rampart", 1);
-            NamespacedKey bossBarKey = new NamespacedKey(plugin, Long.toString(createdTime));
-            Bukkit.createBossBar(bossBarKey, name, BarColor.WHITE, BarStyle.SOLID);
+            coreHealth = getCoreMaxHealth();
+            rampartHealth = getRampartMaxHealth();
             getBossBar().setProgress(1);
             setCore();
             setRampart();
             Castles.castles.add(this);
+            corePatterns.put(this, registerCorePattern(this));
         }
     }
 
-    public BossBar getBossBar() {
+    public @NotNull BossBar getBossBar() {
         NamespacedKey bossBarKey = new NamespacedKey(plugin, Long.toString(createdTime));
-        return Bukkit.getBossBar(bossBarKey);
+        BossBar bossBar = Bukkit.getBossBar(bossBarKey);
+        if (bossBar == null) {
+            Bukkit.createBossBar(bossBarKey, name, BarColor.WHITE, BarStyle.SOLID);
+            bossBar = Bukkit.getBossBar(bossBarKey);
+            bossBar.setProgress(coreHealth / getCoreMaxHealth());
+        }
+        return bossBar;
     }
 
     private void setCore() {
@@ -191,6 +201,11 @@ public class Castle implements Serializable {
         setRampartHealth(getRampartMaxHealth());
         updateRampart();
         setOwner(team);
+        if (team != null) {
+            for (Player player : getPlayersInCastle()) {
+                if (team.hasPlayer(player)) player.setBedSpawnLocation(getLocation(), true);
+            }
+        }
         getLocation().getWorld().spawnParticle(Particle.ELECTRIC_SPARK, getLocation(), 100, 0.5, 0.5, 0.5, 0.1);
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (team == null) {
@@ -228,10 +243,17 @@ public class Castle implements Serializable {
         for (ChunkPos chunk : chunks) {
             chunk.getChunk().getPersistentDataContainer().set(Utils.castlesKey, PersistentDataType.STRING, name);
         }
+        getBossBar().setTitle(name);
         setCore();
     }
 
     public void setOwner(Team owner) {
+        for (OfflinePlayer player : getOwner().getPlayers()) {
+            if (player.isOnline() && Objects.equals(getCastleByLocation(player.getBedSpawnLocation()), this)) {
+                Castle nearestCastle = getNearestTeamCastle(player.getPlayer());
+                ((Player) player).setBedSpawnLocation(nearestCastle == null ? null : nearestCastle.getLocation(), true);
+            }
+        }
         this.owner = owner == null ? null : owner.getName();
         Material wool = DyeColor2Wool.get(t2dColorMap.get(owner != null && owner.hasColor() ? owner.color() : NamedTextColor.WHITE));
         for (Map<String, Object> wools : flags.get("wools")) {
@@ -288,6 +310,9 @@ public class Castle implements Serializable {
         for (Map<String, Object> beds : flags.get("fences")) {
             Location bedLocation = Location.deserialize(beds);
             bedLocation.getBlock().setType(Material.AIR);
+        }
+        for (BukkitTask task : corePatterns.get(this)) {
+            task.cancel();
         }
     }
 
@@ -442,7 +467,7 @@ public class Castle implements Serializable {
     }
 
     public int getRampartMaxHealth() {
-        return levels.get("rampart") * 100;
+        return levels.get("rampart") * 200;
     }
 
     public void damageRampart() {
@@ -520,55 +545,50 @@ public class Castle implements Serializable {
                 for (Player player : getPlayersInCastle()) player.sendActionBar(formatComponent(Component.text(String.format(CASTLE_CORE_HEALTH.getPhrase(player), (int) coreHealth, (int) getCoreMaxHealth())), getComponent(player)));
             }
         }
-        List<LivingEntity> entities = new ArrayList<>();
-        entities.addAll(getMobsInCastle());
-        entities.addAll(getPlayersInCastle());
-        for (LivingEntity entity : entities) {
-            if (getOwner() == null || !(entity instanceof Player && getOwner().hasPlayer((Player) entity))) {
-                //TODO: Add attack paterns
-                if (levels.get("core") >= 1) {
-                    shootArrow(entity);
-                }
-                if (levels.get("core") >= 2) {
-                    shootShulkerBullet(entity);
-                }
-                if (levels.get("core") >= 3) {
-                    summonEvokerFangs(entity);
-                }
-                if (levels.get("core") >= 4) {
-                    summonVex(entity);
-                }
-                if (levels.get("core") >= 5) {
-                    summonAreaCloudEffect(entity);
-                }
-            }
-        }
     }
 
     public void shootArrow(LivingEntity entity) {
         Vector direction = entity.getLocation().subtract(getLocation()).toVector().normalize();
-        Arrow arrow = getLocation().getWorld().spawnArrow(getLocation().add(0, 1, 0),  direction, 1, 100);
-        arrow.setVelocity(direction.multiply(2));
+        Arrow arrow = getLocation().getWorld().spawnArrow(getLocation().add(0, 1, 0),  direction, 1, 12);
+        arrow.setVelocity(direction.multiply(1.5));
+        arrow.setLifetimeTicks(20 * 3);
+        arrow.getPersistentDataContainer().set(castlesKey, PersistentDataType.STRING, name);
         arrow.setShooter(getCore());
     }
 
     public void shootShulkerBullet(LivingEntity entity) {
         ShulkerBullet bullet = getLocation().getWorld().spawn(getLocation().add(0, 1, 0), ShulkerBullet.class);
         bullet.setTarget(entity);
+        bullet.getPersistentDataContainer().set(castlesKey, PersistentDataType.STRING, name);
         bullet.setShooter(getCore());
     }
 
-    public void summonAreaCloudEffect(LivingEntity entity) {
-        Vector direction = entity.getLocation().subtract(getLocation()).toVector().normalize();
-        AreaEffectCloud cloud = getLocation().getWorld().spawn(getLocation().add(direction), AreaEffectCloud.class);
-        cloud.setRadius(1);
+    public void summonIceField(LivingEntity entity) {
+        AreaEffectCloud cloud = getLocation().getWorld().spawn(entity.getLocation(), AreaEffectCloud.class);
+        cloud.setRadius(5);
         cloud.setRadiusOnUse(-0.1f);
         cloud.setDuration(20 * 5);
         cloud.setParticle(Particle.BLOCK_CRACK, Material.ICE.createBlockData());
         cloud.setDurationOnUse(20 * 5);
         cloud.setReapplicationDelay(20 * 5);
         cloud.setBasePotionData(new PotionData(PotionType.SLOWNESS));
+        cloud.getPersistentDataContainer().set(castlesKey, PersistentDataType.STRING, name);
         cloud.setSource(getCore());
+    }
+
+    public void summonToxicField(LivingEntity entity) {
+        AreaEffectCloud cloud = getLocation().getWorld().spawn(entity.getLocation(), AreaEffectCloud.class);
+        cloud.setRadius(5);
+        cloud.setRadiusOnUse(-0.1f);
+        cloud.setDuration(20 * 5);
+        cloud.setParticle(Particle.BLOCK_CRACK, Material.WEATHERED_COPPER.createBlockData());
+        cloud.setDurationOnUse(20 * 5);
+        cloud.setReapplicationDelay(20 * 5);
+        cloud.getPersistentDataContainer().set(castlesKey, PersistentDataType.STRING, name);
+        cloud.setSource(getCore());
+        Scheduler.scheduleSyncDelayedTask(() -> {
+            cloud.setBasePotionData(new PotionData(PotionType.POISON));
+        }, 20);
     }
 
     public void summonEvokerFangs(LivingEntity entity) {
@@ -576,6 +596,7 @@ public class Castle implements Serializable {
         Location location = getLocation();
         Scheduler.scheduleSyncRepeatingTask(() -> {
             EvokerFangs fang = location.getWorld().spawn(location.add(direction), EvokerFangs.class);
+            fang.getPersistentDataContainer().set(castlesKey, PersistentDataType.STRING, name);
             fang.setOwner(getCore());
         }, 0, 2, 9);
     }
@@ -584,24 +605,29 @@ public class Castle implements Serializable {
         Location location = getLocation();
         Vex vex = location.getWorld().spawn(location, Vex.class);
         vex.setTarget(entity);
+        vex.getPersistentDataContainer().set(castlesKey, PersistentDataType.STRING, name);
+        getOwner().addEntity(vex);
+        Scheduler.scheduleSyncDelayedTask(() -> {
+            vex.remove();
+        }, 20 * 60);
     }
 
     public List<Player> getPlayersInCastle() {
         List<Player> players = new ArrayList<>();
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (getCastleByLocation(player.getLocation()) == this) players.add(player);
+            if (getCastleByLocation(player.getLocation()) == this && player.getLocation().distance(getLocation()) <= 16) players.add(player);
         }
         return players;
     }
 
-    public List<Mob> getMobsInCastle() {
-        List<Mob> mobs = new ArrayList<>();
+    public List<Monster> getMonstersInCastle() {
+        List<Monster> monsters = new ArrayList<>();
         for (ChunkPos chunkPos : chunks) {
             for (Entity entity : chunkPos.getChunk().getEntities()) {
-                if (entity instanceof Mob) mobs.add((Mob) entity);
+                if (entity instanceof Monster && !getCore().equals(entity) && !entity.getType().equals(EntityType.VEX) && getCore().getLocation().distance(entity.getLocation()) <= 16) monsters.add((Monster) entity);
             }
         }
-        return mobs;
+        return monsters;
     }
 
     /**
