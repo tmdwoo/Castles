@@ -109,6 +109,7 @@ public class ItemHandler implements Listener {
         int taskId = Integer.parseInt(key[0]);
         BukkitTask createCastle = Bukkit.getScheduler().getPendingTasks().stream().filter(task -> task.getTaskId() == taskId).findFirst().orElse(null);
         if (createCastle == null) return;
+        createCastle.cancel();
         event.setCancelled(true);
         Location location = new Location(player.getWorld(), Double.parseDouble(key[1]) + 0.5, Double.parseDouble(key[2]), Double.parseDouble(key[3]) + 0.5);
         String name = ((TextComponent) event.message()).content();
