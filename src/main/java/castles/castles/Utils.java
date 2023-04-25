@@ -944,6 +944,12 @@ public class Utils {
         return objective;
     }
 
+    public static int getScore(@NotNull Team team) {
+        Objective bloodPoints = getBloodPointsObjective();
+        Score score = bloodPoints.getScore(getDisplayName(team));
+        return score.getScore();
+    }
+
     public static void addScore(@Nullable Team team, int value) {
         if (team == null) return;
         Objective bloodPoints = getBloodPointsObjective();
@@ -1119,22 +1125,5 @@ public class Utils {
      */
     public static @Nullable Castle getNearestCastle(Player player) {
         return getNearestCastle(player.getLocation());
-    }
-
-    /**
-     * Get the castle with the give Component name.
-     * @param Component The Component name of the castle
-     * @return The castle at the given chunk or null if no castle exists at the given chunk
-     */
-    public static Castle getCastleByComponent(@Nullable Component Component) {
-        if (Component == null) {
-            return null;
-        }
-        for (Castle castle : castles) {
-            if (castle.getComponent().equals(Component)) {
-                return castle;
-            }
-        }
-        return null;
     }
 }

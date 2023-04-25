@@ -3,10 +3,10 @@ package castles.castles.gui;
 import castles.castles.Castle;
 import castles.castles.config.Config;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -19,6 +19,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.Team;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import static castles.castles.Utils.*;
@@ -55,7 +57,7 @@ public class CoreGuiHandler implements Listener {
 
     private ItemStack getExpandCastleItem(Castle castle) {
         ChunkPos mainChunk = castle.chunks.get(0);
-        for (int i = -4; i < 5; i++) for (int j = -4; j < 5; j++) {
+        for (int i = -2; i < 4; i++) for (int j = -4; j < 5; j++) {
             if (i == 0 && j == 0) continue;
             ChunkPos chunk = new ChunkPos(mainChunk.getWorld(), mainChunk.getX() + i, mainChunk.getZ() + j);
             if (castle.chunks.contains(chunk)) continue;
@@ -86,24 +88,26 @@ public class CoreGuiHandler implements Listener {
     }
 
     private Inventory getExpandCastleGui(Player opener, Castle castle) {
-        Inventory inv = Bukkit.createInventory(null, 81, castle.getComponent().append(Component.text(" Expand", NamedTextColor.DARK_GRAY)));
+        Inventory inv = Bukkit.createInventory(null, 54, castle.getComponent().append(Component.text(" Expand", NamedTextColor.DARK_GRAY)));
         ChunkPos mainChunk = castle.chunks.get(0);
-        for (int i = -4; i < 5; i++) for (int j = -4; j < 5; j++) {
-            ChunkPos chunk = new ChunkPos(mainChunk.getWorld(), mainChunk.getX() + i, mainChunk.getZ() + j);
-            if (castle.chunks.contains(chunk)) inv.setItem((i + 4) * 9 + (j + 4), createGuiItem(Material.WHITE_STAINED_GLASS_PANE, 0, castle.getComponent(opener)));
+        for (int i = -2; i < 4; i++) for (int j = -4; j < 5; j++) {
+            ChunkPos chunk = new ChunkPos(mainChunk.getWorld(), mainChunk.getX() + j, mainChunk.getZ() + i);
+            if (castle.chunks.contains(chunk)) inv.setItem((i + 2) * 9 + (j + 4), createGuiItem(Material.WHITE_STAINED_GLASS_PANE, 0, castle.getComponent(opener)));
+            else if (getCastleByChunk(chunk) != null) inv.setItem((i + 2) * 9 + (j + 4), createGuiItem(Material.RED_STAINED_GLASS_PANE, 0, Component.text("Cannot Expand Here", NamedTextColor.RED),
+                    Component.text("Already claimed by ", NamedTextColor.GRAY), getCastleByChunk(chunk).getComponent(opener)));
             else {
                 boolean adjacent = false;
                 for (ChunkPos adj : chunk.getAdjacent()) {
-                    if (adj.getX() >= mainChunk.getX() - 4 && adj.getX() <= mainChunk.getX() + 4 && adj.getZ() >= mainChunk.getZ() - 4 && adj.getZ() <= mainChunk.getZ() + 4) {
+                    if (adj.getX() >= mainChunk.getX() - 4 && adj.getX() <= mainChunk.getX() + 4 && adj.getZ() >= mainChunk.getZ() - 2 && adj.getZ() <= mainChunk.getZ() + 3) {
                         if (castle.chunks.contains(adj)) {
                             adjacent = true;
                             break;
                         }
                     }
                 }
-                if (adjacent) inv.setItem((i + 4) * 9 + (j + 4), createGuiItem(Material.LIME_STAINED_GLASS_PANE, 0,Component.text("Expand Castle", NamedTextColor.GREEN),
-                        formatComponent(Component.text("Cost: 10 {0}", NamedTextColor.GRAY), Component.text("Blood Point", NamedTextColor.RED))));
-                else inv.setItem((i + 4) * 9 + (j + 4), createGuiItem(Material.RED_STAINED_GLASS_PANE, 0, Component.text("Cannot Expand Here", NamedTextColor.RED),
+                if (adjacent) inv.setItem((i + 2) * 9 + (j + 4), createGuiItem(Material.LIME_STAINED_GLASS_PANE, 0,Component.text("Expand Castle", NamedTextColor.GREEN),
+                        formatComponent(Component.text("Cost: 20 {0}", NamedTextColor.GRAY), Component.text("Blood Point", NamedTextColor.RED))));
+                else inv.setItem((i + 2) * 9 + (j + 4), createGuiItem(Material.RED_STAINED_GLASS_PANE, 0, Component.text("Cannot Expand Here", NamedTextColor.RED),
                         Component.text("Must be adjacent to existing castle", NamedTextColor.GRAY)));
             }
         }
@@ -115,6 +119,7 @@ public class CoreGuiHandler implements Listener {
         if (event.getRightClicked().getPersistentDataContainer().has(castlesKey)) {
             Entity core = event.getRightClicked();
             Castle castle = getCastleByName(core.getPersistentDataContainer().get(castlesKey, PersistentDataType.STRING));
+            if (castle == null) return;
             Player player = event.getPlayer();
             if (!player.hasPermission("castles.openGUI")) return;
             Team team = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
@@ -123,13 +128,14 @@ public class CoreGuiHandler implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onClickCoreGui(InventoryClickEvent event) {
-        Castle castle = getCastleByComponent(event.getView().title());
+        Castle castle = getCastleByName(ChatColor.stripColor(event.getView().getTitle()));
         if (castle == null) return;
         event.setCancelled(true);
         Player player = (Player) event.getWhoClicked();
-        if (event.getSlot() == 1) {
+        int slot = event.getSlot();
+        if (slot == 1) {
             int level = castle.levels.get("rampart");
             int obsidian = player.getInventory().all(Material.OBSIDIAN).values().stream().mapToInt(ItemStack::getAmount).sum();
             if (Config.getGlobal().STATE.equals("WAR")) {
@@ -167,7 +173,7 @@ public class CoreGuiHandler implements Listener {
             event.getInventory().setItem(7, getCastleStatsItem(castle));
             return;
         }
-        if (event.getSlot() == 3) {
+        if (slot == 3) {
             int level = castle.levels.get("core");
             int diamond = player.getInventory().all(Material.DIAMOND).values().stream().mapToInt(ItemStack::getAmount).sum();
             if (Config.getGlobal().STATE.equals("WAR")) {
@@ -192,13 +198,12 @@ public class CoreGuiHandler implements Listener {
             event.getInventory().setItem(7, getCastleStatsItem(castle));
             return;
         }
-        if (event.getSlot() == 5) {
+        if (slot == 5) {
             ChunkPos mainChunk = castle.chunks.get(0);
             for (int i = -4; i < 5; i++) for (int j = -4; j < 5; j++) {
                 if (i == 0 && j == 0) continue;
                 ChunkPos chunk = new ChunkPos(mainChunk.getWorld(), mainChunk.getX() + i, mainChunk.getZ() + j);
-                if (castle.chunks.contains(chunk)) continue;
-                else {
+                if (!castle.chunks.contains(chunk)) {
                     player.openInventory(getExpandCastleGui(player, castle));
                     return;
                 }
@@ -206,33 +211,41 @@ public class CoreGuiHandler implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onClickExpandCastleGui(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
-        String title =((TextComponent) event.getView().title()).content();
-        if (!title.endsWith("Expand") || title.split(" ").length != 2) return;
-        Castle castle = getCastleByName(title.split(" ")[0]);
+        List<String> title = Arrays.asList(ChatColor.stripColor(event.getView().getTitle()).split(" "));
+        if (title.size() == 1 || !title .get(title.size() - 1).equals("Expand")) return;
+        String castleName = String.join(" ", title.subList(0, title.size() - 1));
+        Castle castle = getCastleByName(castleName);
         if (castle == null) return;
         event.setCancelled(true);
         int slot = event.getSlot();
-        int chunkX = slot % 9 - 4, chunkZ = slot / 9 - 4;
+        int chunkX = slot % 9 - 4, chunkZ = slot / 9 - 2;
         ItemStack item = event.getCurrentItem();
         if (item.getType() != Material.LIME_STAINED_GLASS_PANE) return;
         ChunkPos chunk = new ChunkPos(castle.chunks.get(0).getWorld(), castle.chunks.get(0).getX() + chunkX, castle.chunks.get(0).getZ() + chunkZ);
-        if (castle.chunks.contains(chunk)) {
-            player.sendMessage(Component.text("Cannot Expand Castle Here", NamedTextColor.RED));
+        if (getCastleByChunk(chunk) != null) {
+            player.sendMessage(Component.text("Chunk Already Claimed", NamedTextColor.RED));
             player.closeInventory();
             return;
         }
         for (ChunkPos c : chunk.getAdjacent()) {
             if (castle.chunks.contains(c)) {
-                player.sendMessage(Component.text("Cannot Expand Castle Here", NamedTextColor.RED));
+                if (getScore(castle.getOwner()) < 20) {
+                    player.sendMessage(Component.text("Not Enough Blood Points", NamedTextColor.RED));
+                    player.closeInventory();
+                    return;
+                }
+                setScore(castle.getOwner(), getScore(castle.getOwner()) - 20);
+                castle.expand(chunk);
+                player.sendMessage(Component.text("Castle Expanded", NamedTextColor.GREEN));
                 player.closeInventory();
+                player.openInventory(getExpandCastleGui(player, castle));
                 return;
             }
         }
-        castle.expand(chunk);
-        player.sendMessage(Component.text("Castle Expanded", NamedTextColor.GREEN));
-        return;
+        player.sendMessage(Component.text("Cannot Expand Castle Here", NamedTextColor.RED));
+        player.closeInventory();
     }
 }
