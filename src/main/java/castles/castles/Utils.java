@@ -799,6 +799,8 @@ public class Utils {
         Material wool = DyeColor2Wool.get(t2dColorMap.get(team != null && team.hasColor() ? team.color() : NamedTextColor.WHITE));
         Block cursor = world.getBlockAt(x, y - 1, z);
         wools.add(cursor.getLocation().serialize());
+        wools.add(cursor.getLocation().add(0, 1, 0).serialize());
+        wools.add(cursor.getLocation().add(0, 2, 0).serialize());
         cursor.setType(wool);
         double[] flagEnd = getLineForward(location.getX(), location.getZ(), location.getX() - getMod(location.getX(), CHUNK_SIZE) + 8, location.getZ() -  getMod(location.getZ(), CHUNK_SIZE) + 8, 8);
         int[][] flags = getLineCoordinates(location.getX(), location.getZ(), flagEnd[0], flagEnd[1]);
