@@ -65,6 +65,10 @@ public class Lang_ko_KR {
         // Castles rampart
         put(CASTLES_RAMPART_LEVEL, "{0}의 성벽 레벨을 %d로 설정했습니다");
         put(CASTLES_RAMPART_HEALTH, "{0}의 성벽 체력을 %d로 설정했습니다");
+        // Castles expand
+        put(CASTLES_EXPAND, "{0}에 (%d, %d) 청크를 확장했습니다");
+        // Castles item
+        put(CASTLES_ITEM_GIVEN, "{1}에게 {0}을(를) 지급했습니다");
         // Castle Broadcasts
         put(CASTLE_RAMPART_ATTACKED, "{0}의 성벽이 공격받고 있습니다!");
         put(CASTLE_RAMPART_PERCENT, "{0}의 성벽의 %d%%가 파괴되었습니다!");

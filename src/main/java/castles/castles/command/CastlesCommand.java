@@ -347,6 +347,7 @@ public class CastlesCommand implements CommandExecutor {
         for (ChunkPos castleChunk : castle.chunks) {
             if (castleChunk.isAdjacent(chunkPos)) {
                 castle.expand(chunkPos);
+                sender.sendMessage(formatComponent(Component.text(String.format(CASTLES_EXPAND.getPhrase(sender), chunkPos.getX(), chunkPos.getZ())), castle.getComponent(sender)));
                 return;
             }
         }
@@ -791,6 +792,7 @@ public class CastlesCommand implements CommandExecutor {
         } else {
             ((Player) sender).getInventory().addItem(core);
         }
+        sender.sendMessage(formatComponent(Component.text(CASTLES_ITEM_GIVEN.getPhrase(sender)), core.displayName(), ((Player) sender).displayName()));
     }
 
 

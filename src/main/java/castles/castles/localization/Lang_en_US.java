@@ -68,6 +68,10 @@ public class Lang_en_US {
         // Castles rampart
         put(CASTLES_RAMPART_LEVEL, "Set castle {0}'s rampart level to %d");
         put(CASTLES_RAMPART_HEALTH, "Set castle {0}'s rampart health to %d");
+        // Castles expand
+        put(CASTLES_EXPAND, "Expanded castle {0} to include chunk (%d, %d)");
+        // Castles item
+        put(CASTLES_ITEM_GIVEN, "Gave {0} to {1}");
         // Castle Broadcasts
         put(CASTLE_RAMPART_ATTACKED, "The rampart of {0} has been attacked!");
         put(CASTLE_RAMPART_PERCENT, "%d%% of {0} Castle's rampart has been destroyed!");
