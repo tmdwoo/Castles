@@ -2,6 +2,7 @@ package castles.castles.item;
 
 import castles.castles.Castle;
 import castles.castles.Utils;
+import castles.castles.config.Config;
 import castles.castles.scheduler.Scheduler;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
@@ -69,6 +70,11 @@ public class ItemHandler implements Listener {
         }
         if (player.getPersistentDataContainer().has(createCastleKey, PersistentDataType.STRING)) {
             player.sendMessage(Component.text("You are already creating a castle", NamedTextColor.RED));
+            returnCore(player);
+            return;
+        }
+        if (location.getX() < Config.getGlobal().MINIMUM_CASTLE_X || location.getX() > Config.getGlobal().MAXIMUM_CASTLE_X || location.getZ() < Config.getGlobal().MINIMUM_CASTLE_Z || location.getZ() > Config.getGlobal().MAXIMUM_CASTLE_Z) {
+            player.sendMessage(Component.text(String.format(CASTLE_OUT_OF_RANGE.getPhrase(player), Config.getGlobal().MINIMUM_CASTLE_X, Config.getGlobal().MINIMUM_CASTLE_X, Config.getGlobal().MAXIMUM_CASTLE_X, Config.getGlobal().MAXIMUM_CASTLE_Z), NamedTextColor.RED));
             returnCore(player);
             return;
         }
