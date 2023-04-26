@@ -134,7 +134,9 @@ public class ItemHandler implements Listener {
             return;
         }
         Team team = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
-        Scheduler.scheduleSyncDelayedTask(() -> new Castle(name, location, team), 0);
-        player.sendMessage(formatComponent(Component.text(CASTLES_CREATE.getPhrase(player)), getCastleByName(name).getComponent(player)));
+        Scheduler.scheduleSyncDelayedTask(() -> {
+            new Castle(name, location, team);
+            player.sendMessage(formatComponent(Component.text(CASTLES_CREATE.getPhrase(player)), getCastleByName(name).getComponent(player)));
+        }, 0);
     }
 }
