@@ -114,6 +114,7 @@ public class ItemHandler implements Listener {
         Player player = event.getPlayer();
         if (!player.getPersistentDataContainer().has(createCastleKey, PersistentDataType.STRING)) return;
         String[] key = player.getPersistentDataContainer().get(createCastleKey, PersistentDataType.STRING).split(",");
+        player.getPersistentDataContainer().remove(createCastleKey);
         if (key.length != 4) return;
         int taskId = Integer.parseInt(key[0]);
         BukkitTask createCastle = Bukkit.getScheduler().getPendingTasks().stream().filter(task -> task.getTaskId() == taskId).findFirst().orElse(null);
