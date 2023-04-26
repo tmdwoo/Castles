@@ -39,7 +39,6 @@ import static castles.castles.Utils.*;
 import static castles.castles.localization.Phrase.*;
 import static castles.castles.scheduler.CorePattern.registerCorePattern;
 import static castles.castles.scheduler.Schedules.corePatterns;
-import static java.lang.Math.max;
 
 public class Castle implements Serializable {
     public String name;
@@ -49,7 +48,6 @@ public class Castle implements Serializable {
     public ArrayList<ChunkPos> chunks = new ArrayList<>();
     public UUID coreUUID;
     public HashMap<String, List<Map<String, Object>>> flags;
-    int rampartHeight;
     public HashMap<Map<String, Object>, String> rampart = new HashMap<>();
     public List<Map<String, Object>> crackedRampart = new ArrayList<>();
     public HashMap<Map<String, Object>, String> beforeRampart = new HashMap<>();
@@ -86,7 +84,7 @@ public class Castle implements Serializable {
             rampartHealth = getRampartMaxHealth();
             getBossBar().setProgress(1);
             setCore();
-            setRampart();
+            buildRampart();
             Castles.castles.add(this);
             corePatterns.put(this, registerCorePattern(this));
         }
@@ -337,20 +335,8 @@ public class Castle implements Serializable {
         }
     }
 
-    public void setRampart() {
-        ChunkPos chunk = chunks.get(0);
-        int top = getWorldEnv(chunk.getWorld()).getMinY() + 12;
-        for (int x = 0; x < 16; x++) {
-            for (int z = 0; z < 16; z++) {
-                top = max(top, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + x, chunk.getZ() * 16 + z, HeightMap.WORLD_SURFACE_WG) + 6);
-            }
-        }
-        rampartHeight = top;
-        buildRampart();
-    }
-
     public void buildRampart() {
-        HashMap<Map<String, Object>, String> coords = getRampartCoords(chunks, rampartHeight);
+        HashMap<Map<String, Object>, String> coords = getRampartCoords(chunks, getLocation().getBlockY());
         for (Map.Entry<Map<String, Object>, String> entry : coords.entrySet()) {
             Location location = Location.deserialize(entry.getKey());
             Block block = location.getBlock();
