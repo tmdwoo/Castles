@@ -5,6 +5,7 @@ import castles.castles.Castles;
 import castles.castles.scheduler.Scheduler;
 import com.destroystokyo.paper.event.player.PlayerSetSpawnEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -85,6 +86,21 @@ public class CastleMiscellaneousHandler implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Castle fromCastle = getCastleByLocation(event.getPlayer().getLocation());
         updateBossBar(fromCastle, null, event.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        Location spawnLocation = player.getBedSpawnLocation();
+        Team team = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
+        if (team == null) return;
+        Castle spawnCastle = getCastleByLocation(spawnLocation);
+        if (spawnLocation == null || spawnCastle == null || !Objects.equals(team, spawnCastle.getOwner())) {
+            Castle nearestCastle = getNearestTeamCastle(player);
+            if (nearestCastle != null) {
+                event.setRespawnLocation(nearestCastle.getLocation());
+            }
+        }
     }
 
     @EventHandler
