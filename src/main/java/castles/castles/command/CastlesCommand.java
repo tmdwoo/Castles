@@ -396,9 +396,9 @@ public class CastlesCommand implements CommandExecutor {
             }
             sender.sendMessage(formatComponent(Component.text(String.format(TELEPORT_WARMUP.getPhrase(sender), Config.getGlobal().TELEPORT_WARMUP)), castle.getComponent(sender)));
             teleportWarmup.put((Player) sender, Scheduler.scheduleSyncDelayedTask(() -> {
+                container.set(cooldownKey, PersistentDataType.INTEGER, Config.getGlobal().TELEPORT_COOLDOWN);
                 ((Player) sender).teleport(Location.deserialize(castle.location));
                 sender.sendMessage(formatComponent(Component.text(CASTLES_TELEPORT.getPhrase(sender)), castle.getComponent(sender)));
-                container.set(cooldownKey, PersistentDataType.INTEGER, Config.getGlobal().TELEPORT_COOLDOWN);
             }, Config.getGlobal().TELEPORT_WARMUP * 20));
         }
     }
