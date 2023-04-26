@@ -30,6 +30,7 @@ import static castles.castles.localization.Phrase.*;
 
 public class ItemHandler implements Listener {
     private final NamespacedKey createCastleKey = new NamespacedKey(plugin, "createCastle");
+
     public void returnCore(Player player) {
         if (player.getInventory().contains(getItemCore())) {
             player.getInventory().addItem(getItemCore());
@@ -39,6 +40,7 @@ public class ItemHandler implements Listener {
             player.getWorld().dropItemNaturally(player.getLocation(), getItemCore());
         }
     }
+
     private void createCastle(Location location, Player player) {
         /*
         TODO: create castle 함수
@@ -90,16 +92,17 @@ public class ItemHandler implements Listener {
 
     @EventHandler
     public void onCoreUse(PlayerInteractEvent event) {
-        if (event.getClickedBlock() == null || !event.getClickedBlock().isSolid()) return;
         Player player = event.getPlayer();
         if (!Objects.equals(event.getHand(), EquipmentSlot.HAND)) return;
         if (player.getInventory().getItemInMainHand().isSimilar(getItemCore())) {
             event.setCancelled(true);
+            if (event.getClickedBlock() == null || !event.getClickedBlock().isSolid()) return;
             player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
             Location location = event.getClickedBlock().getLocation().add(event.getBlockFace().getDirection());
             createCastle(location, player);
         } else if (player.getInventory().getItemInOffHand().isSimilar(getItemCore())) {
             event.setCancelled(true);
+            if (event.getClickedBlock() == null || !event.getClickedBlock().isSolid()) return;
             player.getInventory().getItemInOffHand().setAmount(player.getInventory().getItemInOffHand().getAmount() - 1);
             Location location = event.getClickedBlock().getLocation().add(event.getBlockFace().getDirection());
             createCastle(location, player);
