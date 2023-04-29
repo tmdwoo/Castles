@@ -121,7 +121,7 @@ public class CoreGuiHandler implements Listener {
             Castle castle = getCastleByName(core.getPersistentDataContainer().get(castlesKey, PersistentDataType.STRING));
             if (castle == null) return;
             Player player = event.getPlayer();
-            if (!player.hasPermission("castles.openGUI")) return;
+            if (!player.hasPermission("castles.GUI")) return;
             Team team = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
             if (team == null || !Objects.equals(team, castle.getOwner())) return;
             player.openInventory(getCoreGui(player, castle));
@@ -199,14 +199,10 @@ public class CoreGuiHandler implements Listener {
             return;
         }
         if (slot == 5) {
-            ChunkPos mainChunk = castle.chunks.get(0);
-            for (int i = -4; i < 5; i++) for (int j = -4; j < 5; j++) {
-                if (i == 0 && j == 0) continue;
-                ChunkPos chunk = new ChunkPos(mainChunk.getWorld(), mainChunk.getX() + i, mainChunk.getZ() + j);
-                if (!castle.chunks.contains(chunk)) {
-                    player.openInventory(getExpandCastleGui(player, castle));
-                    return;
-                }
+            if (player.hasPermission("castles.GUI.expand")) player.openInventory(getExpandCastleGui(player, castle));
+            else {
+                player.sendMessage(Component.text("You do not have permission to expand castle", NamedTextColor.RED));
+                event.getInventory().close();
             }
         }
     }
