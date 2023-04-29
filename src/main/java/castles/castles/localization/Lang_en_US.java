@@ -23,6 +23,7 @@ public class Lang_en_US {
         put(ALREADY_PART_OF_THE_CASTLE, "This chunk is already part of the castle");
         put(ALREADY_PART_OF_ANOTHER_CASTLE, "This chunk is already part of another castle");
         put(DIFFERENT_WORLD, "The location must be in the castle's world");
+        put(NOT_ADJACENT, "The chunk must be adjacent to the castle");
         put(TELEPORT_PERMISSION_OWNER_ONLY, "You must be the owner of this castle to teleport");
         put(OUT_OF_CASTLE, "The location must be in the castle");
         put(UNKNOWN_TEAM, "Unknown team '%s'");

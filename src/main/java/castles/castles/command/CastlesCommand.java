@@ -344,13 +344,14 @@ public class CastlesCommand implements CommandExecutor {
             sender.sendMessage(Component.text(DIFFERENT_WORLD.getPhrase(sender), NamedTextColor.RED));
             return;
         }
-        for (ChunkPos castleChunk : castle.chunks) {
-            if (castleChunk.isAdjacent(chunkPos)) {
+        for (ChunkPos adjacent : chunkPos.getAdjacent()) {
+            if (castle.chunks.contains(adjacent)) {
                 castle.expand(chunkPos);
                 sender.sendMessage(formatComponent(Component.text(String.format(CASTLES_EXPAND.getPhrase(sender), chunkPos.getX(), chunkPos.getZ())), castle.getComponent(sender)));
                 return;
             }
         }
+        sender.sendMessage(Component.text(NOT_ADJACENT.getPhrase(sender), NamedTextColor.RED));
     }
 
     private void teleport(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, int index) {
