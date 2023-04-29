@@ -310,10 +310,7 @@ public class Castle implements Serializable {
         }
         Bukkit.removeBossBar(bossBarKey);
         Entity core = getCore();
-        if (core != null) {
-            core.remove();
-            Castles.castles.remove(this);
-        }
+        core.remove();
         for (Map<String, Object> wools : flags.get("wools")) {
             Location woolLocation = Location.deserialize(wools);
             woolLocation.getBlock().setType(Material.AIR);
@@ -325,6 +322,7 @@ public class Castle implements Serializable {
         for (BukkitTask task : corePatterns.get(this)) {
             task.cancel();
         }
+        Castles.castles.remove(this);
     }
 
     public void showBorder(Player player) {

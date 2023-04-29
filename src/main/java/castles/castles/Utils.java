@@ -291,6 +291,9 @@ public class Utils {
     }
 
     public static final NamespacedKey castlesKey = new NamespacedKey(plugin, "castles");
+    public static final NamespacedKey createCastleKey = new NamespacedKey(plugin, "createCastle");
+    public static final NamespacedKey destroyCastleKey = new NamespacedKey(plugin, "destroyCastle");
+
 
     public static final Collection<Material> HOLLOW_MATERIALS = new HashSet<>();
     public static final Collection<Material> DAMAGING_TYPES = new HashSet<>(Arrays.asList(
@@ -926,6 +929,18 @@ public class Utils {
             }
         }
         return coords;
+    }
+
+    public static boolean isPlayerInChatInteraction(Player player) {
+        if (player.getPersistentDataContainer().has(createCastleKey, PersistentDataType.STRING)) {
+            player.sendMessage(Component.text("You are already creating a castle", NamedTextColor.RED));
+            return true;
+        }
+        if (player.getPersistentDataContainer().has(destroyCastleKey, PersistentDataType.STRING)) {
+            player.sendMessage(Component.text("You are already destroying a castle", NamedTextColor.RED));
+            return true;
+        }
+        return false;
     }
 
     public static @NotNull String getDisplayName(@NotNull Team team) {

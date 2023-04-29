@@ -75,3 +75,6 @@ permissions:
   castles.GUI.expand:
     description: Open expand GUI
     default: op
+  castles.GUI.destroy:
+    description: Destroy castle with GUI
+    default: op

@@ -2,6 +2,7 @@ package castles.castles.gui;
 
 import castles.castles.Castle;
 import castles.castles.config.Config;
+import castles.castles.scheduler.Scheduler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -9,15 +10,18 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Team;
 
 import java.util.Arrays;
@@ -28,6 +32,7 @@ import java.util.regex.Pattern;
 
 import static castles.castles.Utils.*;
 import static castles.castles.gui.GuiUtils.createGuiItem;
+import static castles.castles.item.ItemHandler.returnCore;
 import static castles.castles.localization.Phrase.*;
 
 public class CoreGuiHandler implements Listener {
@@ -58,26 +63,13 @@ public class CoreGuiHandler implements Listener {
                 formatComponent(Component.text(String.format("You have %d {0}", diamond), NamedTextColor.GRAY), Component.text("Diamond", NamedTextColor.AQUA)));
     }
 
-    private ItemStack getExpandCastleItem(Castle castle) {
-        ChunkPos mainChunk = castle.chunks.get(0);
-        for (int i = -2; i < 3; i++) for (int j = -4; j < 5; j++) {
-            if (i == 0 && j == 0) continue;
-            ChunkPos chunk = new ChunkPos(mainChunk.getWorld(), mainChunk.getX() + i, mainChunk.getZ() + j);
-            if (castle.chunks.contains(chunk)) continue;
-            else return createGuiItem(Material.EMERALD, 1, Component.text("Expand Castle", NamedTextColor.GREEN));
-        }
-        return createGuiItem(Material.EMERALD, 1, Component.text("Max Castle Size Reached", NamedTextColor.RED));
+    private ItemStack getExpandCastleItem() {
+        return createGuiItem(Material.EMERALD, 1, Component.text("Expand Castle", NamedTextColor.GREEN));
     }
 
-    private ItemStack getCastleStatsItem(Castle castle) {
-        return createGuiItem(Material.REDSTONE_TORCH, 0,
-                Component.text("| Castle Stats |", NamedTextColor.GOLD),
-                Component.text("Rampart Health: ", NamedTextColor.GRAY), Component.text(String.format("%d / %d", castle.rampartHealth, castle.getRampartMaxHealth()), NamedTextColor.WHITE),
-                Component.text("Core Health: ", NamedTextColor.GRAY), Component.text(String.format("%d / %d", (int) castle.coreHealth, (int) castle.getCoreMaxHealth()), NamedTextColor.WHITE),
-                Component.text("Rampart Level: ", NamedTextColor.GRAY), Component.text(String.valueOf(castle.levels.get("rampart")), NamedTextColor.WHITE),
-                Component.text("Core Level: ", NamedTextColor.GRAY), Component.text(String.valueOf(castle.levels.get("core")), NamedTextColor.WHITE),
-                Component.text("Castle Size: ", NamedTextColor.GRAY), Component.text(String.valueOf(castle.chunks.size()), NamedTextColor.WHITE)
-        );
+    private ItemStack getCastleDestroyItem() {
+        return createGuiItem(Material.TNT, 0, Component.text("Destroy Castle", NamedTextColor.RED),
+                formatComponent(Component.text("Cost: 30 {0}", NamedTextColor.WHITE), Component.text("Blood Point", NamedTextColor.RED)));
     }
 
     private Inventory getCoreGui(Player opener, Castle castle) {
@@ -85,8 +77,8 @@ public class CoreGuiHandler implements Listener {
 
         inv.setItem(1, getRampartUpgradeItem(opener, castle));
         inv.setItem(3, getCoreUpgradeItem(opener, castle));
-        inv.setItem(5, getExpandCastleItem(castle));
-        inv.setItem(7, getCastleStatsItem(castle));
+        inv.setItem(5, getExpandCastleItem());
+        inv.setItem(7, getCastleDestroyItem());
         return inv;
     }
 
@@ -142,7 +134,7 @@ public class CoreGuiHandler implements Listener {
                         inv.setItem((i + 2) * 9 + (j + 4), createGuiItem(Material.LIME_STAINED_GLASS_PANE, 0,
                                 Component.text("Expand Castle", NamedTextColor.GREEN),
                                 Component.text(String.format("Chunk %d, %d", chunk.getX(), chunk.getZ()), NamedTextColor.GRAY),
-                                formatComponent(Component.text("Cost: 20 {0}", NamedTextColor.GRAY), Component.text("Blood Point", NamedTextColor.RED))));
+                                formatComponent(Component.text("Cost: 20 {0}", NamedTextColor.WHITE), Component.text("Blood Point", NamedTextColor.RED))));
                     else
                         inv.setItem((i + 2) * 9 + (j + 4), createGuiItem(Material.RED_STAINED_GLASS_PANE, 0,
                                 Component.text("Cannot Expand Here", NamedTextColor.RED),
@@ -193,7 +185,6 @@ public class CoreGuiHandler implements Listener {
                 castle.setRampartHealth(castle.getRampartMaxHealth());
                 player.sendMessage(Component.text("Rampart Repaired", NamedTextColor.GREEN));
                 event.getInventory().setItem(1, getRampartUpgradeItem(player, castle));
-                event.getInventory().setItem(7, getCastleStatsItem(castle));
                 return;
             }
             if (level == 5) {
@@ -210,7 +201,6 @@ public class CoreGuiHandler implements Listener {
             castle.setRampartLevel(level + 1);
             player.sendMessage(Component.text("Rampart Upgraded", NamedTextColor.GREEN));
             event.getInventory().setItem(1, getRampartUpgradeItem(player, castle));
-            event.getInventory().setItem(7, getCastleStatsItem(castle));
             return;
         }
         if (slot == 3) {
@@ -235,16 +225,85 @@ public class CoreGuiHandler implements Listener {
             castle.setCoreLevel(level + 1);
             player.sendMessage(Component.text("Core Upgraded", NamedTextColor.GREEN));
             event.getInventory().setItem(3, getCoreUpgradeItem(player, castle));
-            event.getInventory().setItem(7, getCastleStatsItem(castle));
             return;
         }
         if (slot == 5) {
             if (player.hasPermission("castles.GUI.expand")) player.openInventory(getExpandCastleGui(player, castle));
             else {
                 player.sendMessage(Component.text("You do not have permission to expand castle", NamedTextColor.RED));
-                event.getInventory().close();
+                return;
             }
         }
+        if (slot == 7) {
+            if (!player.hasPermission("castles.GUI.destroy")) {
+                player.sendMessage(Component.text("You do not have permission to destroy castle", NamedTextColor.RED));
+                return;
+            }
+            if (Config.getGlobal().STATE.equals("WAR")) {
+                player.sendMessage(Component.text("Cannot Destroy Castle During War", NamedTextColor.RED));
+                event.getInventory().close();
+                return;
+            }
+            Team team = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
+            Team owner = castle.getOwner();
+            if (owner == null || !owner.equals(team)) {
+                player.sendMessage(Component.text(GUI_CASTLE_DESTROY_OWNER_ONLY.getPhrase(player), NamedTextColor.RED));
+                return;
+            }
+            if (getScore(team) < 30) {
+                player.sendMessage(Component.text(BP_NOT_ENOUGH.getPhrase(player), NamedTextColor.RED));
+                return;
+            }
+            if (isPlayerInChatInteraction(player)) {
+                return;
+            }
+            player.sendMessage(formatComponent(Component.text("Type {0} in chat in 15 seconds", NamedTextColor.GRAY), castle.getComponent()));
+            BukkitTask destroyCastle = Scheduler.scheduleSyncDelayedTask(() -> {
+                player.sendMessage(Component.text("Destroying castle cancelled due to timeout", NamedTextColor.RED));
+                player.getPersistentDataContainer().remove(destroyCastleKey)    ;
+            }, 20 * 15);
+            String key = String.join("\"", String.valueOf(destroyCastle.getTaskId()), castle.name);
+            player.getPersistentDataContainer().set(destroyCastleKey, PersistentDataType.STRING, key);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onConfirmDestroy(AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
+        if (!player.getPersistentDataContainer().has(destroyCastleKey, PersistentDataType.STRING)) return;
+        String[] key = player.getPersistentDataContainer().get(destroyCastleKey, PersistentDataType.STRING).split("\"");
+        player.getPersistentDataContainer().remove(destroyCastleKey);
+        if (key.length != 2) return;
+        int taskId = Integer.parseInt(key[0]);
+        BukkitTask destroyCastle = Bukkit.getScheduler().getPendingTasks().stream().filter(task -> task.getTaskId() == taskId).findFirst().orElse(null);
+        if (destroyCastle == null) return;
+        destroyCastle.cancel();
+        event.setCancelled(true);
+        String messageCastle = event.getMessage();
+        String castleName = key[1];
+        if (!messageCastle.equals(castleName)) {
+            player.sendMessage(Component.text(GUI_CASTLE_DESTROY_NAME_NOT_MATCH.getPhrase(player), NamedTextColor.RED));
+            return;
+        }
+        Team team = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
+        Castle castle = getCastleByName(castleName);
+        Team owner = castle.getOwner();
+        if (owner == null || !owner.equals(team)) {
+            player.sendMessage(Component.text(GUI_CASTLE_DESTROY_OWNER_ONLY.getPhrase(player), NamedTextColor.RED));
+            return;
+        }
+        if (getScore(team) < 30) {
+            player.sendMessage(Component.text(BP_NOT_ENOUGH.getPhrase(player), NamedTextColor.RED));
+            return;
+        }
+        player.sendMessage(formatComponent(Component.text(GUI_CASTLE_DESTROY.getPhrase(player)), castle.getComponent(player)));
+        Scheduler.scheduleSyncDelayedTask(() -> {
+            castle.destroy();
+            setScore(castle.getOwner(), getScore(castle.getOwner()) - 30);
+            returnCore(player);
+            player.closeInventory();
+            player.playSound(castle.getLocation(), Sound.BLOCK_ANVIL_LAND, 1, 1);
+        }, 0);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -256,6 +315,12 @@ public class CoreGuiHandler implements Listener {
         Castle castle = getCastleByName(castleName);
         if (castle == null) return;
         event.setCancelled(true);
+        Team team = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
+        Team owner = castle.getOwner();
+        if (owner == null || !owner.equals(team)) {
+            player.sendMessage(Component.text(GUI_CASTLE_EXPAND_OWNER_ONLY.getPhrase(player), NamedTextColor.RED));
+            return;
+        }
         int slot = event.getSlot();
         ItemStack item = event.getCurrentItem();
         Inventory inventory = event.getInventory();
@@ -288,7 +353,7 @@ public class CoreGuiHandler implements Listener {
         int chunkX = Integer.parseInt(matcher.group(1));
         int chunkZ = Integer.parseInt(matcher.group(2));
         ChunkPos chunk = new ChunkPos(castle.chunks.get(0).getWorld(), chunkX, chunkZ);
-        if (getScore(castle.getOwner()) < 20) {
+        if (getScore(owner) < 20) {
             player.sendMessage(Component.text(BP_NOT_ENOUGH.getPhrase(player), NamedTextColor.RED));
             player.closeInventory();
             return;
@@ -303,7 +368,7 @@ public class CoreGuiHandler implements Listener {
         }
         for (ChunkPos c : chunk.getAdjacent()) {
             if (castle.chunks.contains(c)) {
-                setScore(castle.getOwner(), getScore(castle.getOwner()) - 20);
+                setScore(castle.getOwner(), getScore(owner) - 20);
                 castle.expand(chunk);
                 player.sendMessage(formatComponent(Component.text(String.format(CASTLES_EXPAND.getPhrase(player), chunk.getX(), chunk.getZ())), castle.getComponent(player)));
                 player.closeInventory();

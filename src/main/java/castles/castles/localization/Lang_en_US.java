@@ -92,5 +92,10 @@ public class Lang_en_US {
         // Blood Points
         put(NEGATIVE_BLOODPOINTS, "Blood points must be non-negative");
         put(UNKNOWN_PLAYER, "No player was found");
+        // GUI
+        put(GUI_CASTLE_EXPAND_OWNER_ONLY, "You must be the owner of this castle to expand it");
+        put(GUI_CASTLE_DESTROY, "Destroyed castle {0}");
+        put(GUI_CASTLE_DESTROY_NAME_NOT_MATCH, "The name you entered does not match the castle's name");
+        put(GUI_CASTLE_DESTROY_OWNER_ONLY, "You must be the owner of this castle to destroy it");
     }};
 }

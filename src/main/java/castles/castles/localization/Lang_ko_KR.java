@@ -89,5 +89,10 @@ public class Lang_ko_KR {
         // Blood Points
         put(NEGATIVE_BLOODPOINTS, "블러드 포인트는 음수가 될 수 없습니다");
         put(UNKNOWN_PLAYER, "플레이어를 찾을 수 없습니다");
+        // GUI
+        put(GUI_CASTLE_EXPAND_OWNER_ONLY, "You must be the owner of this castle to expand it");
+        put(GUI_CASTLE_DESTROY, "{0}을(를) 파괴하였습니다");
+        put(GUI_CASTLE_DESTROY_NAME_NOT_MATCH, "성의 이름이 일치하지 않습니다");
+        put(GUI_CASTLE_DESTROY_OWNER_ONLY, "You must be the owner of this castle to destroy it");
     }};
 }
