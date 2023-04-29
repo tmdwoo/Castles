@@ -69,6 +69,12 @@ permissions:
   castles.bloodpoints:
     description: Blood Points command
     default: op
-  castles.openGUI:
+  castles.GUI:
     description: Open GUI with interaction
+    default: true
+  castles.GUI.expand:
+    description: Open expand GUI
+    default: op
+  castles.GUI.destroy:
+    description: Destroy castle with GUI
     default: op

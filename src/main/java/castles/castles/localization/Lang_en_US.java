@@ -23,6 +23,7 @@ public class Lang_en_US {
         put(ALREADY_PART_OF_THE_CASTLE, "This chunk is already part of the castle");
         put(ALREADY_PART_OF_ANOTHER_CASTLE, "This chunk is already part of another castle");
         put(DIFFERENT_WORLD, "The location must be in the castle's world");
+        put(NOT_ADJACENT, "The chunk must be adjacent to the castle");
         put(TELEPORT_PERMISSION_OWNER_ONLY, "You must be the owner of this castle to teleport");
         put(OUT_OF_CASTLE, "The location must be in the castle");
         put(UNKNOWN_TEAM, "Unknown team '%s'");
@@ -91,5 +92,10 @@ public class Lang_en_US {
         // Blood Points
         put(NEGATIVE_BLOODPOINTS, "Blood points must be non-negative");
         put(UNKNOWN_PLAYER, "No player was found");
+        // GUI
+        put(GUI_CASTLE_EXPAND_OWNER_ONLY, "You must be the owner of this castle to expand it");
+        put(GUI_CASTLE_DESTROY, "Destroyed castle {0}");
+        put(GUI_CASTLE_DESTROY_NAME_NOT_MATCH, "The name you entered does not match the castle's name");
+        put(GUI_CASTLE_DESTROY_OWNER_ONLY, "You must be the owner of this castle to destroy it");
     }};
 }
