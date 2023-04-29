@@ -57,7 +57,7 @@ public class CoreGuiHandler implements Listener {
 
     private ItemStack getExpandCastleItem(Castle castle) {
         ChunkPos mainChunk = castle.chunks.get(0);
-        for (int i = -2; i < 4; i++) for (int j = -4; j < 5; j++) {
+        for (int i = -2; i < 3; i++) for (int j = -4; j < 5; j++) {
             if (i == 0 && j == 0) continue;
             ChunkPos chunk = new ChunkPos(mainChunk.getWorld(), mainChunk.getX() + i, mainChunk.getZ() + j);
             if (castle.chunks.contains(chunk)) continue;
@@ -88,27 +88,64 @@ public class CoreGuiHandler implements Listener {
     }
 
     private Inventory getExpandCastleGui(Player opener, Castle castle) {
-        Inventory inv = Bukkit.createInventory(null, 54, castle.getComponent().append(Component.text(" Expand", NamedTextColor.DARK_GRAY)));
+        return getExpandCastleGui(opener, castle, 0, 0);
+    }
+
+    private Inventory getExpandCastleGui(Player opener, Castle castle, int x, int z) {
+        Inventory inv = Bukkit.createInventory(null, 45, castle.getComponent().append(Component.text(" Expand", NamedTextColor.DARK_GRAY)));
         ChunkPos mainChunk = castle.chunks.get(0);
-        for (int i = -2; i < 4; i++) for (int j = -4; j < 5; j++) {
-            ChunkPos chunk = new ChunkPos(mainChunk.getWorld(), mainChunk.getX() + j, mainChunk.getZ() + i);
-            if (castle.chunks.contains(chunk)) inv.setItem((i + 2) * 9 + (j + 4), createGuiItem(Material.WHITE_STAINED_GLASS_PANE, 0, castle.getComponent(opener)));
-            else if (getCastleByChunk(chunk) != null) inv.setItem((i + 2) * 9 + (j + 4), createGuiItem(Material.RED_STAINED_GLASS_PANE, 0, Component.text("Cannot Expand Here", NamedTextColor.RED),
-                    Component.text("Already claimed by ", NamedTextColor.GRAY), getCastleByChunk(chunk).getComponent(opener)));
-            else {
-                boolean adjacent = false;
-                for (ChunkPos adj : chunk.getAdjacent()) {
-                    if (adj.getX() >= mainChunk.getX() - 4 && adj.getX() <= mainChunk.getX() + 4 && adj.getZ() >= mainChunk.getZ() - 2 && adj.getZ() <= mainChunk.getZ() + 3) {
-                        if (castle.chunks.contains(adj)) {
-                            adjacent = true;
-                            break;
+        for (int i = -2; i < 3; i++) for (int j = -4; j < 5; j++) {
+            if (i == -2 && j == 0) {
+                inv.setItem(4, createGuiItem(Material.PURPLE_STAINED_GLASS_PANE, 1,
+                        Component.text("⬆️", NamedTextColor.WHITE)));
+            } else if (i == 0 && j == 4) {
+                inv.setItem(26, createGuiItem(Material.PURPLE_STAINED_GLASS_PANE, 2,
+                        Component.text("➡️", NamedTextColor.WHITE)));
+            } else if (i == 2 && j == 0) {
+                inv.setItem(40, createGuiItem(Material.PURPLE_STAINED_GLASS_PANE, 3,
+                        Component.text("⬇️", NamedTextColor.WHITE)));
+            } else if (i == 0 && j == -4) {
+                inv.setItem(18, createGuiItem(Material.PURPLE_STAINED_GLASS_PANE, 4,
+                        Component.text("⬅️", NamedTextColor.WHITE)));
+            } else if (i == -2 || i == 2 || j == -4 || j == 4) {
+                inv.setItem((i + 2) * 9 + (j + 4), createGuiItem(Material.PURPLE_STAINED_GLASS_PANE, 0,
+                        Component.text("", NamedTextColor.WHITE)));
+            } else {
+                ChunkPos chunk = new ChunkPos(mainChunk.getWorld(), mainChunk.getX() + j + x, mainChunk.getZ() + i + z);
+                if (castle.chunks.contains(chunk)) {
+                    inv.setItem((i + 2) * 9 + (j + 4), createGuiItem(Material.WHITE_STAINED_GLASS_PANE, 0,
+                            castle.getComponent(opener),
+                            Component.text(String.format("Chunk %d, %d", chunk.getX(), chunk.getZ()), NamedTextColor.GRAY),
+                            Component.text("Claimed Chunk", NamedTextColor.GRAY)));
+                }
+                else if (getCastleByChunk(chunk) != null) {
+                    Castle other = getCastleByChunk(chunk);
+                    inv.setItem((i + 2) * 9 + (j + 4), createGuiItem(Material.RED_STAINED_GLASS_PANE, 0,
+                            other.getComponent(opener),
+                            Component.text(String.format("Chunk %d, %d", chunk.getX(), chunk.getZ()), NamedTextColor.GRAY),
+                            Component.text("Already claimed by ", NamedTextColor.GRAY).append(other.getComponent(opener))));
+                }
+                else {
+                    boolean adjacent = false;
+                    for (ChunkPos adj : chunk.getAdjacent()) {
+                        if (adj.getX() >= mainChunk.getX() - 4 && adj.getX() <= mainChunk.getX() + 4 && adj.getZ() >= mainChunk.getZ() - 1 && adj.getZ() <= mainChunk.getZ() + 1) {
+                            if (castle.chunks.contains(adj)) {
+                                adjacent = true;
+                                break;
+                            }
                         }
                     }
+                    if (adjacent)
+                        inv.setItem((i + 2) * 9 + (j + 4), createGuiItem(Material.LIME_STAINED_GLASS_PANE, 0,
+                                Component.text("Expand Castle", NamedTextColor.GREEN),
+                                Component.text(String.format("Chunk %d, %d", chunk.getX(), chunk.getZ()), NamedTextColor.GRAY),
+                                formatComponent(Component.text("Cost: 20 {0}", NamedTextColor.GRAY), Component.text("Blood Point", NamedTextColor.RED))));
+                    else
+                        inv.setItem((i + 2) * 9 + (j + 4), createGuiItem(Material.RED_STAINED_GLASS_PANE, 0,
+                                Component.text("Cannot Expand Here", NamedTextColor.RED),
+                                Component.text(String.format("Chunk %d, %d", chunk.getX(), chunk.getZ()), NamedTextColor.GRAY),
+                                Component.text("Must be adjacent to this castle", NamedTextColor.GRAY)));
                 }
-                if (adjacent) inv.setItem((i + 2) * 9 + (j + 4), createGuiItem(Material.LIME_STAINED_GLASS_PANE, 0,Component.text("Expand Castle", NamedTextColor.GREEN),
-                        formatComponent(Component.text("Cost: 20 {0}", NamedTextColor.GRAY), Component.text("Blood Point", NamedTextColor.RED))));
-                else inv.setItem((i + 2) * 9 + (j + 4), createGuiItem(Material.RED_STAINED_GLASS_PANE, 0, Component.text("Cannot Expand Here", NamedTextColor.RED),
-                        Component.text("Must be adjacent to existing castle", NamedTextColor.GRAY)));
             }
         }
         return inv;
