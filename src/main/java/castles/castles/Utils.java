@@ -893,14 +893,24 @@ public class Utils {
         int bottom = coreY;
         for (ChunkPos chunkPos : chunks) {
             Chunk chunk = chunkPos.getChunk();
-            for (int x = 0; x < 16; x++) {
-                for (int z = 0; z < 16; z++) {
-                    top = max(top, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + x, chunk.getZ() * 16 + z, HeightMap.WORLD_SURFACE_WG) + 6);
-                    bottom = min(bottom, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + x, chunk.getZ() * 16 + z, HeightMap.WORLD_SURFACE) + 1);
-                }
+            for (int i = 0; i < 15; i++) {
+                top = max(top, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16, chunk.getZ() * 16 + i, HeightMap.WORLD_SURFACE) + 12);
+                bottom = min(bottom, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16, chunk.getZ() * 16 + i, HeightMap.WORLD_SURFACE) + 1);
+            }
+            for (int i = 0; i < 15; i++) {
+                top = max(top, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + i, chunk.getZ() * 16 + 15, HeightMap.WORLD_SURFACE) + 12);
+                bottom = min(bottom, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + i, chunk.getZ() * 16 + 15, HeightMap.WORLD_SURFACE) + 1);
+            }
+            for (int i = 15; i > 0; i--) {
+                top = max(top, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + 15, chunk.getZ() * 16 + i, HeightMap.WORLD_SURFACE) + 12);
+                bottom = min(bottom, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + 15, chunk.getZ() * 16 + i, HeightMap.WORLD_SURFACE) + 1);
+            }
+            for (int i = 15; i > 0; i--) {
+                top = max(top, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + i, chunk.getZ() * 16, HeightMap.WORLD_SURFACE) + 12);
+                bottom = min(bottom, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + i, chunk.getZ() * 16, HeightMap.WORLD_SURFACE) + 1);
             }
         }
-        bottom = max(bottom, getWorldEnv(world).getMinY()) - 1;
+        bottom = max(bottom, getWorldEnv(world).getMinY()) - 3;
         Set<Location> xzCoords = getBorderCoords(chunks);
         List<Integer> bricks = new ArrayList<>(Arrays.asList(2, 3, 5, 6, 9, 10, 12, 13));
         List<Integer> slab = new ArrayList<>(Arrays.asList(1, 4, 11, 14));
