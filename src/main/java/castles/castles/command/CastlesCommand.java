@@ -25,10 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static castles.castles.Castles.teleportWarmup;
@@ -112,7 +109,7 @@ public class CastlesCommand implements CommandExecutor {
             } else {
                 castles = new ArrayList<>();
                 for (Castle castle : Castles.castles) {
-                    if (castle.getOwner().equals(team)) {
+                    if (Objects.equals(castle.getOwner(), team)) {
                         castles.add(castle);
                     }
                 }

@@ -259,7 +259,7 @@ public class Castle implements Serializable {
     }
 
     public void setOwner(Team owner) {
-        for (OfflinePlayer player : getOwner().getPlayers()) {
+        if (getOwner() != null) for (OfflinePlayer player : getOwner().getPlayers()) {
             if (player.isOnline() && Objects.equals(getCastleByLocation(player.getBedSpawnLocation()), this)) {
                 Castle nearestCastle = getNearestTeamCastle(player.getPlayer());
                 ((Player) player).setBedSpawnLocation(nearestCastle == null ? null : nearestCastle.getLocation(), true);
@@ -583,9 +583,7 @@ public class Castle implements Serializable {
         cloud.setReapplicationDelay(20 * 5);
         cloud.getPersistentDataContainer().set(castlesKey, PersistentDataType.STRING, name);
         cloud.setSource(getCore());
-        Scheduler.scheduleSyncDelayedTask(() -> {
-            cloud.setBasePotionData(new PotionData(PotionType.POISON));
-        }, 20);
+        Scheduler.scheduleSyncDelayedTask(() -> cloud.setBasePotionData(new PotionData(PotionType.POISON)), 20);
     }
 
     public void summonEvokerFangs(LivingEntity entity) {
@@ -603,10 +601,8 @@ public class Castle implements Serializable {
         Vex vex = location.getWorld().spawn(location, Vex.class);
         vex.setTarget(entity);
         vex.getPersistentDataContainer().set(castlesKey, PersistentDataType.STRING, name);
-        getOwner().addEntity(vex);
-        Scheduler.scheduleSyncDelayedTask(() -> {
-            vex.remove();
-        }, 20 * 60);
+        if (getOwner() != null) getOwner().addEntity(vex);
+        Scheduler.scheduleSyncDelayedTask(vex::remove, 20 * 60);
     }
 
     public List<Player> getPlayersInCastle() {

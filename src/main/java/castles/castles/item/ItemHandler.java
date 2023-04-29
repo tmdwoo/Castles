@@ -10,7 +10,6 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,7 +22,6 @@ import org.bukkit.scoreboard.Team;
 
 import java.util.Objects;
 
-import static castles.castles.Castles.plugin;
 import static castles.castles.Utils.*;
 import static castles.castles.item.Items.getItemCore;
 import static castles.castles.localization.Phrase.*;
