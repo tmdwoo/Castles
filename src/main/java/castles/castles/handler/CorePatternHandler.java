@@ -1,7 +1,6 @@
 package castles.castles.handler;
 
 import castles.castles.Castle;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,8 +24,8 @@ public class CorePatternHandler implements Listener {
         }
         if (castle == null) return;
         if (entity instanceof Player) {
-            Team team = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam((Player) entity);
-            if (team != null && team.hasPlayer((Player) entity)) {
+            Team owner = castle.getOwner();
+            if (owner != null && owner.hasPlayer((Player) entity)) {
                 event.setCancelled(true);
             }
         }
@@ -49,8 +48,8 @@ public class CorePatternHandler implements Listener {
             event.setCancelled(true);
         }
         if (entity instanceof Player) {
-            Team team = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam((Player) entity);
-            if (team != null && team.hasPlayer((Player) entity)) {
+            Team owner = castle.getOwner();
+            if (owner != null && owner.hasPlayer((Player) entity)) {
                 event.setCancelled(true);
             }
         }
