@@ -25,7 +25,6 @@ import static java.lang.Math.*;
 
 
 public class Utils {
-
     public static final int CHUNK_SIZE = 16;
 
     public static final HashMap<DyeColor, TextColor> d2tColorMap = new HashMap<>() {{
@@ -292,6 +291,9 @@ public class Utils {
     }
 
     public static final NamespacedKey castlesKey = new NamespacedKey(plugin, "castles");
+    public static final NamespacedKey createCastleKey = new NamespacedKey(plugin, "createCastle");
+    public static final NamespacedKey destroyCastleKey = new NamespacedKey(plugin, "destroyCastle");
+
 
     public static final Collection<Material> HOLLOW_MATERIALS = new HashSet<>();
     public static final Collection<Material> DAMAGING_TYPES = new HashSet<>(Arrays.asList(
@@ -888,16 +890,37 @@ public class Utils {
         return xzCoords;
     }
 
-    public static HashMap<Map<String, Object>, String> getRampartCoords(@NotNull ArrayList<ChunkPos> chunks, int top) {
+    public static HashMap<Map<String, Object>, String> getRampartCoords(@NotNull ArrayList<ChunkPos> chunks, int coreY) {
         World world = chunks.get(0).getWorld();
+        int topSum = 0;
+        int bottom = coreY;
+        for (ChunkPos chunkPos : chunks) {
+            Chunk chunk = chunkPos.getChunk();
+            for (int i = 0; i < 15; i++) {
+                topSum += chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16, chunk.getZ() * 16 + i, HeightMap.WORLD_SURFACE);
+                bottom = min(bottom, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16, chunk.getZ() * 16 + i, HeightMap.WORLD_SURFACE) + 1);
+            }
+            for (int i = 0; i < 15; i++) {
+                topSum += chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + i, chunk.getZ() * 16 + 15, HeightMap.WORLD_SURFACE);
+                bottom = min(bottom, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + i, chunk.getZ() * 16 + 15, HeightMap.WORLD_SURFACE) + 1);
+            }
+            for (int i = 15; i > 0; i--) {
+                topSum += chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + 15, chunk.getZ() * 16 + i, HeightMap.WORLD_SURFACE);
+                bottom = min(bottom, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + 15, chunk.getZ() * 16 + i, HeightMap.WORLD_SURFACE) + 1);
+            }
+            for (int i = 15; i > 0; i--) {
+                topSum += chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + i, chunk.getZ() * 16, HeightMap.WORLD_SURFACE);
+                bottom = min(bottom, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + i, chunk.getZ() * 16, HeightMap.WORLD_SURFACE) + 1);
+            }
+        }
+        bottom = max(bottom, getWorldEnv(world).getMinY()) - 3;
+        int top = max(getWorldEnv(world).getMinY(), topSum / (CHUNK_SIZE * 4 - 4)) + 12;
         Set<Location> xzCoords = getBorderCoords(chunks);
-
         List<Integer> bricks = new ArrayList<>(Arrays.asList(2, 3, 5, 6, 9, 10, 12, 13));
         List<Integer> slab = new ArrayList<>(Arrays.asList(1, 4, 11, 14));
         List<Integer> stairs = new ArrayList<>(Arrays.asList(7, 8));
         HashMap<Map<String, Object>, String> coords = new HashMap<>();
         Location cursor;
-        int bottom = getWorldEnv(world).getMinY();
 
         for (Location location : xzCoords) {
             cursor = new Location(location.getWorld(), location.getX(), top, location.getZ());
@@ -917,6 +940,18 @@ public class Utils {
             }
         }
         return coords;
+    }
+
+    public static boolean isPlayerInChatInteraction(Player player) {
+        if (player.getPersistentDataContainer().has(createCastleKey, PersistentDataType.STRING)) {
+            player.sendMessage(Component.text("You are already creating a castle", NamedTextColor.RED));
+            return true;
+        }
+        if (player.getPersistentDataContainer().has(destroyCastleKey, PersistentDataType.STRING)) {
+            player.sendMessage(Component.text("You are already destroying a castle", NamedTextColor.RED));
+            return true;
+        }
+        return false;
     }
 
     public static @NotNull String getDisplayName(@NotNull Team team) {

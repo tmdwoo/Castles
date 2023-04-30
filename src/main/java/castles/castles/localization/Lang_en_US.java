@@ -16,12 +16,14 @@ public class Lang_en_US {
         put(REQUIRE_ENTITY, "An entity is required to run this command here");
         put(REQUIRE_PLAYER, "A player is required to run this command");
         put(CASTLE_ALREADY_IN_CHUNK, "A castle already exists in this chunk");
+        put(CASTLE_OUT_OF_RANGE, "Castle must be between (%d, %d) to (%d, %d)");
         put(Y_COORD_OUT_OF_RANGE, "Y coordinate must be between %d and %d");
         put(CORE_ON_EDGE, "Core cannot be placed on the edge of a chunk");
         put(UNKNOWN_CASTLE, "Unknown castle '%s'");
         put(ALREADY_PART_OF_THE_CASTLE, "This chunk is already part of the castle");
         put(ALREADY_PART_OF_ANOTHER_CASTLE, "This chunk is already part of another castle");
         put(DIFFERENT_WORLD, "The location must be in the castle's world");
+        put(NOT_ADJACENT, "The chunk must be adjacent to the castle");
         put(TELEPORT_PERMISSION_OWNER_ONLY, "You must be the owner of this castle to teleport");
         put(OUT_OF_CASTLE, "The location must be in the castle");
         put(UNKNOWN_TEAM, "Unknown team '%s'");
@@ -67,6 +69,10 @@ public class Lang_en_US {
         // Castles rampart
         put(CASTLES_RAMPART_LEVEL, "Set castle {0}'s rampart level to %d");
         put(CASTLES_RAMPART_HEALTH, "Set castle {0}'s rampart health to %d");
+        // Castles expand
+        put(CASTLES_EXPAND, "Expanded castle {0} to include chunk (%d, %d)");
+        // Castles item
+        put(CASTLES_ITEM_GIVEN, "Gave {0} to {1}");
         // Castle Broadcasts
         put(CASTLE_RAMPART_ATTACKED, "The rampart of {0} has been attacked!");
         put(CASTLE_RAMPART_PERCENT, "%d%% of {0} Castle's rampart has been destroyed!");
@@ -86,5 +92,14 @@ public class Lang_en_US {
         // Blood Points
         put(NEGATIVE_BLOODPOINTS, "Blood points must be non-negative");
         put(UNKNOWN_PLAYER, "No player was found");
+        // GUI
+        put(GUI_CASTLE_EXPAND_OWNER_ONLY, "You must be the owner of this castle to expand it");
+        put(GUI_CASTLE_DESTROY, "Destroyed castle {0}");
+        put(GUI_CASTLE_DESTROY_NAME_NOT_MATCH, "The name you entered does not match the castle's name");
+        put(GUI_CASTLE_DESTROY_OWNER_ONLY, "You must be the owner of this castle to destroy it");
+        // Team Chat
+        put(TEAMCHAT_REQUIRE_TEAM, "You must be on a team to message your team");
+        put(TEAMCHAT_ENABLED, "Team chat enabled");
+        put(TEAMCHAT_DISABLED, "Team chat disabled");
     }};
 }

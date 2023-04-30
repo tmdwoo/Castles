@@ -2,6 +2,7 @@ package castles.castles.localization;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.Style;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -24,11 +25,13 @@ public enum Phrase {
     REQUIRE_PLAYER,
     CASTLE_ALREADY_IN_CHUNK,
     Y_COORD_OUT_OF_RANGE,
+    CASTLE_OUT_OF_RANGE,
     CORE_ON_EDGE,
     UNKNOWN_CASTLE,
     ALREADY_PART_OF_THE_CASTLE,
     ALREADY_PART_OF_ANOTHER_CASTLE,
     DIFFERENT_WORLD,
+    NOT_ADJACENT,
     TELEPORT_PERMISSION_OWNER_ONLY,
     OUT_OF_CASTLE,
     UNKNOWN_TEAM,
@@ -66,6 +69,8 @@ public enum Phrase {
     CASTLES_CORE_HEALTH,
     CASTLES_RAMPART_LEVEL,
     CASTLES_RAMPART_HEALTH,
+    CASTLES_EXPAND,
+    CASTLES_ITEM_GIVEN,
     CASTLE_RAMPART_ATTACKED,
     CASTLE_RAMPART_PERCENT,
     CASTLE_RAMPART_HEALTH,
@@ -79,7 +84,14 @@ public enum Phrase {
     TELEPORT_COOLDOWN_REMAINING,
     TELEPORT_WARMUP,
     TELEPORT_CANCELLED,
-    BP_NOT_ENOUGH;
+    BP_NOT_ENOUGH,
+    GUI_CASTLE_EXPAND_OWNER_ONLY,
+    GUI_CASTLE_DESTROY,
+    GUI_CASTLE_DESTROY_NAME_NOT_MATCH,
+    GUI_CASTLE_DESTROY_OWNER_ONLY,
+    TEAMCHAT_REQUIRE_TEAM,
+    TEAMCHAT_ENABLED,
+    TEAMCHAT_DISABLED;
 
     public String getPhrase() {
         return en_US.get(this);
@@ -116,24 +128,25 @@ public enum Phrase {
     }
 
     public static Component formatComponent(TextComponent component, Component... args) {
-        TextComponent result = Component.empty();
+        Component result;
         String regex = "\\{\\d+}";
         Pattern pattern = Pattern.compile(regex);
         String text = component.content();
+        Style style = component.style();
         Component child = Component.empty();
         Matcher matcher = pattern.matcher(text);
         while (matcher.find()) {
             String group = matcher.group();
             int index = Integer.parseInt(group.substring(1, group.length() - 1));
             if (index < args.length) {
-                child = child.append(Component.text(text.substring(0, matcher.start())));
+                child = child.append(Component.text(text.substring(0, matcher.start()), style));
                 child = child.append(args[index]);
                 text = text.substring(matcher.end());
                 matcher = pattern.matcher(text);
             }
         }
-        child = child.append(Component.text(text));
-        result = result.append(child);
+        child = child.append(Component.text(text, style));
+        result = child;
         return result;
     }
 }

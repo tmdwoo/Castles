@@ -10,6 +10,7 @@ import io.papermc.paper.event.entity.EntityMoveEvent;
 import io.papermc.paper.event.player.PlayerItemFrameChangeEvent;
 import io.papermc.paper.event.player.PlayerNameEntityEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -89,12 +90,15 @@ public class CastleProtectionHandler implements Listener {
         if (player == null || location == null){
             return false;
         }
+        Castle castle = getCastleByLocation(location);
+        if (isFlag(location, castle)) return true;
         if (player.hasPermission("castles.bypass.protection")){
             return false;
         }
-        Castle castle = getCastleByLocation(location);
+        if (player.getGameMode().equals(GameMode.SPECTATOR)){
+            return false;
+        }
         if (castle != null){
-            if (isFlag(location, castle)) return true;
             Team team = castle.getOwner();
             if (team != null && team.hasPlayer(player)){
                 return false;

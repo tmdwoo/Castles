@@ -1,6 +1,7 @@
 package castles.castles.scheduler;
 
 import castles.castles.Castle;
+import org.bukkit.GameMode;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
@@ -18,7 +19,9 @@ public class CorePattern {
             List<LivingEntity> list = new ArrayList<>();
             list.addAll(castle.getMonstersInCastle());
             list.addAll(castle.getPlayersInCastle());
-            list.removeIf(entity -> castle.getOwner() != null && (entity instanceof Player && (castle.getOwner().hasPlayer((Player) entity) || entity.hasPermission("castles.bypass.protection"))) || entity.isDead() || entity.isInvulnerable());
+            list.removeIf(entity -> entity.isDead() || entity.isInvulnerable() ||
+                    (entity instanceof Player && (((Player) entity).getGameMode().equals(GameMode.CREATIVE) || ((Player) entity).getGameMode().equals(GameMode.SPECTATOR) ||
+                            entity.hasPermission("castles.bypass.protection") || (castle.getOwner() != null && castle.getOwner().hasPlayer((Player) entity)))));
             entities.set(list);
         }, 0, 10, 0);
 

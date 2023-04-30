@@ -25,10 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static castles.castles.Castles.teleportWarmup;
@@ -112,7 +109,7 @@ public class CastlesCommand implements CommandExecutor {
             } else {
                 castles = new ArrayList<>();
                 for (Castle castle : Castles.castles) {
-                    if (castle.getOwner().equals(team)) {
+                    if (Objects.equals(castle.getOwner(), team)) {
                         castles.add(castle);
                     }
                 }
@@ -344,12 +341,14 @@ public class CastlesCommand implements CommandExecutor {
             sender.sendMessage(Component.text(DIFFERENT_WORLD.getPhrase(sender), NamedTextColor.RED));
             return;
         }
-        for (ChunkPos castleChunk : castle.chunks) {
-            if (castleChunk.isAdjacent(chunkPos)) {
+        for (ChunkPos adjacent : chunkPos.getAdjacent()) {
+            if (castle.chunks.contains(adjacent)) {
                 castle.expand(chunkPos);
+                sender.sendMessage(formatComponent(Component.text(String.format(CASTLES_EXPAND.getPhrase(sender), chunkPos.getX(), chunkPos.getZ())), castle.getComponent(sender)));
                 return;
             }
         }
+        sender.sendMessage(Component.text(NOT_ADJACENT.getPhrase(sender), NamedTextColor.RED));
     }
 
     private void teleport(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, int index) {
@@ -396,9 +395,9 @@ public class CastlesCommand implements CommandExecutor {
             }
             sender.sendMessage(formatComponent(Component.text(String.format(TELEPORT_WARMUP.getPhrase(sender), Config.getGlobal().TELEPORT_WARMUP)), castle.getComponent(sender)));
             teleportWarmup.put((Player) sender, Scheduler.scheduleSyncDelayedTask(() -> {
+                container.set(cooldownKey, PersistentDataType.INTEGER, Config.getGlobal().TELEPORT_COOLDOWN);
                 ((Player) sender).teleport(Location.deserialize(castle.location));
                 sender.sendMessage(formatComponent(Component.text(CASTLES_TELEPORT.getPhrase(sender)), castle.getComponent(sender)));
-                container.set(cooldownKey, PersistentDataType.INTEGER, Config.getGlobal().TELEPORT_COOLDOWN);
             }, Config.getGlobal().TELEPORT_WARMUP * 20));
         }
     }
@@ -791,6 +790,7 @@ public class CastlesCommand implements CommandExecutor {
         } else {
             ((Player) sender).getInventory().addItem(core);
         }
+        sender.sendMessage(formatComponent(Component.text(CASTLES_ITEM_GIVEN.getPhrase(sender)), core.displayName(), ((Player) sender).displayName()));
     }
 
 

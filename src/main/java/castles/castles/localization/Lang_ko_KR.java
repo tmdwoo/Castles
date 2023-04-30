@@ -15,12 +15,14 @@ public class Lang_ko_KR {
         put(NAME_DOUBLE_QUOTE, "Castle names cannot contain \"");
         put(REQUIRE_ENTITY, "An entity is required to run this command here");
         put(CASTLE_ALREADY_IN_CHUNK, "A castle already exists in this chunk");
+        put(CASTLE_OUT_OF_RANGE, "Castle must be between (%d, %d) to (%d, %d)");
         put(Y_COORD_OUT_OF_RANGE, "Y coordinate must be between %d and %d");
         put(CORE_ON_EDGE, "Core cannot be placed on the edge of a chunk");
         put(UNKNOWN_CASTLE, "Unknown castle '%s'");
         put(ALREADY_PART_OF_THE_CASTLE, "This chunk is already part of the castle");
         put(ALREADY_PART_OF_ANOTHER_CASTLE, "This chunk is already part of another castle");
         put(DIFFERENT_WORLD, "The location must be in the castle's world");
+        put(NOT_ADJACENT, "The chunk must be adjacent to the castle");
         put(TELEPORT_PERMISSION_OWNER_ONLY, "You must be the owner of this castle to teleport");
         put(OUT_OF_CASTLE, "The location must be in the castle");
         put(UNKNOWN_TEAM, "Unknown team '%s'");
@@ -64,6 +66,10 @@ public class Lang_ko_KR {
         // Castles rampart
         put(CASTLES_RAMPART_LEVEL, "{0}의 성벽 레벨을 %d로 설정했습니다");
         put(CASTLES_RAMPART_HEALTH, "{0}의 성벽 체력을 %d로 설정했습니다");
+        // Castles expand
+        put(CASTLES_EXPAND, "{0}에 (%d, %d) 청크를 확장했습니다");
+        // Castles item
+        put(CASTLES_ITEM_GIVEN, "{1}에게 {0}을(를) 지급했습니다");
         // Castle Broadcasts
         put(CASTLE_RAMPART_ATTACKED, "{0}의 성벽이 공격받고 있습니다!");
         put(CASTLE_RAMPART_PERCENT, "{0}의 성벽의 %d%%가 파괴되었습니다!");
@@ -83,5 +89,14 @@ public class Lang_ko_KR {
         // Blood Points
         put(NEGATIVE_BLOODPOINTS, "블러드 포인트는 음수가 될 수 없습니다");
         put(UNKNOWN_PLAYER, "플레이어를 찾을 수 없습니다");
+        // GUI
+        put(GUI_CASTLE_EXPAND_OWNER_ONLY, "You must be the owner of this castle to expand it");
+        put(GUI_CASTLE_DESTROY, "{0}을(를) 파괴하였습니다");
+        put(GUI_CASTLE_DESTROY_NAME_NOT_MATCH, "성의 이름이 일치하지 않습니다");
+        put(GUI_CASTLE_DESTROY_OWNER_ONLY, "You must be the owner of this castle to destroy it");
+        // Team Chat
+        put(TEAMCHAT_REQUIRE_TEAM, "팀에게 메시지를 보내려면 팀에 속해 있어야 합니다");
+        put(TEAMCHAT_ENABLED, "팀 채팅이 활성화되었습니다");
+        put(TEAMCHAT_DISABLED, "팀 채팅이 비활성화되었습니다");
     }};
 }

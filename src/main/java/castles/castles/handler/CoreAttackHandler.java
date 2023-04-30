@@ -20,13 +20,12 @@ import java.util.Objects;
 
 import static castles.castles.Utils.castlesKey;
 import static castles.castles.Utils.getCastleByName;
-import static org.bukkit.entity.EntityType.AREA_EFFECT_CLOUD;
-import static org.bukkit.entity.EntityType.EVOKER_FANGS;
+import static org.bukkit.entity.EntityType.*;
 import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.*;
 
 public class CoreAttackHandler implements Listener {
 
-    public final List<DamageCause> damageExceptionList = Arrays.asList(CONTACT, SUFFOCATION, FALL, DRAGON_BREATH, FIRE, FALLING_BLOCK, MELTING, LAVA, DROWNING, VOID, SUICIDE, STARVATION, FLY_INTO_WALL, HOT_FLOOR, CRAMMING, DRYOUT, FREEZE);
+    public final List<DamageCause> damageExceptionList = Arrays.asList(CONTACT, SUFFOCATION, FALL, DRAGON_BREATH, FIRE, MELTING, LAVA, DROWNING, VOID, SUICIDE, STARVATION, FLY_INTO_WALL, HOT_FLOOR, CRAMMING, DRYOUT, FREEZE);
 
     boolean isCastleProtected(@NotNull Castle castle) {
         Team t = castle.getOwner();
@@ -65,7 +64,7 @@ public class CoreAttackHandler implements Listener {
 
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
-        if (event.getEntity().getPersistentDataContainer().has(castlesKey)) {
+        if (event.getEntity().getPersistentDataContainer().has(castlesKey) && event.getEntity().getType().equals(BLAZE)) {
             Entity core = event.getEntity();
             Castle castle = getCastleByName(core.getPersistentDataContainer().get(castlesKey, PersistentDataType.STRING));
             if (event.getCause().equals(DamageCause.ENTITY_ATTACK)) {
