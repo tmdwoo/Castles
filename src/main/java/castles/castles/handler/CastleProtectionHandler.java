@@ -89,12 +89,12 @@ public class CastleProtectionHandler implements Listener {
         if (player == null || location == null){
             return false;
         }
+        Castle castle = getCastleByLocation(location);
+        if (isFlag(location, castle)) return true;
         if (player.hasPermission("castles.bypass.protection")){
             return false;
         }
-        Castle castle = getCastleByLocation(location);
         if (castle != null){
-            if (isFlag(location, castle)) return true;
             Team team = castle.getOwner();
             if (team != null && team.hasPlayer(player)){
                 return false;
