@@ -287,6 +287,7 @@ public class CoreGuiHandler implements Listener {
         }
         Team team = Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
         Castle castle = getCastleByName(castleName);
+        if (castle == null) return;
         Team owner = castle.getOwner();
         if (owner == null || !owner.equals(team)) {
             player.sendMessage(Component.text(GUI_CASTLE_DESTROY_OWNER_ONLY.getPhrase(player), NamedTextColor.RED));
