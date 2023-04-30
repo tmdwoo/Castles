@@ -94,5 +94,9 @@ public class Lang_ko_KR {
         put(GUI_CASTLE_DESTROY, "{0}을(를) 파괴하였습니다");
         put(GUI_CASTLE_DESTROY_NAME_NOT_MATCH, "성의 이름이 일치하지 않습니다");
         put(GUI_CASTLE_DESTROY_OWNER_ONLY, "You must be the owner of this castle to destroy it");
+        // Team Chat
+        put(TEAMCHAT_REQUIRE_TEAM, "팀에게 메시지를 보내려면 팀에 속해 있어야 합니다");
+        put(TEAMCHAT_ENABLED, "팀 채팅이 활성화되었습니다");
+        put(TEAMCHAT_DISABLED, "팀 채팅이 비활성화되었습니다");
     }};
 }

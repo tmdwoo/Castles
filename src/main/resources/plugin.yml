@@ -14,6 +14,11 @@ commands:
     usage: /<command>
     aliases: [bp]
     permission: castles.bloodpoints
+  teamchat:
+    description: Team chat command
+    usage: /<command>
+    aliases: [tc]
+    permission: castles.teamchat
 permissions:
   castles.castles:
     description: Castles command
@@ -69,6 +74,9 @@ permissions:
   castles.bloodpoints:
     description: Blood Points command
     default: op
+  castles.teamchat:
+    description: Team chat command
+    default: true
   castles.GUI:
     description: Open GUI with interaction
     default: true
@@ -77,4 +85,10 @@ permissions:
     default: op
   castles.GUI.destroy:
     description: Destroy castle with GUI
+    default: op
+  castles.eavesdrop.teamchat:
+    description: Eavesdrop team chat
+    default: op
+  castles.eavesdrop.whisper:
+    description: Eavesdrop whisper
     default: op
