@@ -97,5 +97,9 @@ public class Lang_en_US {
         put(GUI_CASTLE_DESTROY, "Destroyed castle {0}");
         put(GUI_CASTLE_DESTROY_NAME_NOT_MATCH, "The name you entered does not match the castle's name");
         put(GUI_CASTLE_DESTROY_OWNER_ONLY, "You must be the owner of this castle to destroy it");
+        // Team Chat
+        put(TEAMCHAT_REQUIRE_TEAM, "You must be on a team to message your team");
+        put(TEAMCHAT_ENABLED, "Team chat enabled");
+        put(TEAMCHAT_DISABLED, "Team chat disabled");
     }};
 }

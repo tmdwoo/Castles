@@ -1,5 +1,8 @@
 package castles.castles;
 
+import castles.castles.chat.ChatHandler;
+import castles.castles.chat.TeamChatCommand;
+import castles.castles.chat.TeamChatTabCompletion;
 import castles.castles.command.BloodPointsCommand;
 import castles.castles.command.CastlesCommand;
 import castles.castles.config.Config;
@@ -43,10 +46,13 @@ public final class Castles extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new TeleportHandler(), this);
         getServer().getPluginManager().registerEvents(new CoreGuiHandler(), this);
         getServer().getPluginManager().registerEvents(new ItemHandler(), this);
+        getServer().getPluginManager().registerEvents(new ChatHandler(), this);
         this.getCommand("castles").setExecutor(new CastlesCommand());
         this.getCommand("bloodpoints").setExecutor(new BloodPointsCommand());
+        this.getCommand("teamchat").setExecutor(new TeamChatCommand());
         this.getCommand("castles").setTabCompleter(new CastlesTabCompletion());
         this.getCommand("bloodpoints").setTabCompleter(new BloodPointsTabCompletion());
+        this.getCommand("teamchat").setTabCompleter(new TeamChatTabCompletion());
         loadTeamEntry();
         loadVictims();
         loadCastles();
