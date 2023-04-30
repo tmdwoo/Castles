@@ -81,9 +81,9 @@ public class ChatHandler implements Listener {
     public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
         Team team = player.getScoreboard().getPlayerTeam(player);
-        if (team == null) return;
         String command = event.getMessage();
         if (command.startsWith("/teammsg") && command.split(" ").length > 1) {
+            if (team == null) return;
             event.setCancelled(true);
             String message = command.substring(9);
             TextColor color = team.hasColor() ? team.color() : NamedTextColor.WHITE;
