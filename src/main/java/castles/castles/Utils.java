@@ -892,28 +892,29 @@ public class Utils {
 
     public static HashMap<Map<String, Object>, String> getRampartCoords(@NotNull ArrayList<ChunkPos> chunks, int coreY) {
         World world = chunks.get(0).getWorld();
-        int top = getWorldEnv(world).getMinY() + 12;
+        int topSum = 0;
         int bottom = coreY;
         for (ChunkPos chunkPos : chunks) {
             Chunk chunk = chunkPos.getChunk();
             for (int i = 0; i < 15; i++) {
-                top = max(top, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16, chunk.getZ() * 16 + i, HeightMap.WORLD_SURFACE) + 12);
+                topSum += chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16, chunk.getZ() * 16 + i, HeightMap.WORLD_SURFACE);
                 bottom = min(bottom, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16, chunk.getZ() * 16 + i, HeightMap.WORLD_SURFACE) + 1);
             }
             for (int i = 0; i < 15; i++) {
-                top = max(top, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + i, chunk.getZ() * 16 + 15, HeightMap.WORLD_SURFACE) + 12);
+                topSum += chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + i, chunk.getZ() * 16 + 15, HeightMap.WORLD_SURFACE);
                 bottom = min(bottom, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + i, chunk.getZ() * 16 + 15, HeightMap.WORLD_SURFACE) + 1);
             }
             for (int i = 15; i > 0; i--) {
-                top = max(top, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + 15, chunk.getZ() * 16 + i, HeightMap.WORLD_SURFACE) + 12);
+                topSum += chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + 15, chunk.getZ() * 16 + i, HeightMap.WORLD_SURFACE);
                 bottom = min(bottom, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + 15, chunk.getZ() * 16 + i, HeightMap.WORLD_SURFACE) + 1);
             }
             for (int i = 15; i > 0; i--) {
-                top = max(top, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + i, chunk.getZ() * 16, HeightMap.WORLD_SURFACE) + 12);
+                topSum += chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + i, chunk.getZ() * 16, HeightMap.WORLD_SURFACE);
                 bottom = min(bottom, chunk.getWorld().getHighestBlockYAt(chunk.getX() * 16 + i, chunk.getZ() * 16, HeightMap.WORLD_SURFACE) + 1);
             }
         }
         bottom = max(bottom, getWorldEnv(world).getMinY()) - 3;
+        int top = max(getWorldEnv(world).getMinY(), topSum / (CHUNK_SIZE * 4 - 4)) + 12;
         Set<Location> xzCoords = getBorderCoords(chunks);
         List<Integer> bricks = new ArrayList<>(Arrays.asList(2, 3, 5, 6, 9, 10, 12, 13));
         List<Integer> slab = new ArrayList<>(Arrays.asList(1, 4, 11, 14));
